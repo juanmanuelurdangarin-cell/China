@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juego: La China</title>
+    <style>
+        :root {
+            --gold: #ffd700;
+            --cup: #ff4d4d;
+            --sword: #4d94ff;
+            --club: #4caf50;
+            --card-back: #2c3e50;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #1a472a; /* Verde tapete de mesa */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: white;
+        }
+
+        h1 { margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
+
+        /* Contenedor de la carta */
+        .card-container {
+            width: 200px;
+            height: 300px;
+            perspective: 1000px;
+            cursor: pointer;
+        }
+
+        .card {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            border-radius: 12px;
+        }
+
+        .card.flipped {
+            transform: rotateY(180deg);
+        }
+
+        /* Caras de la carta */
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-around;
+            border-radius: 12px;
+            border: 5px solid white;
+            box-sizing: border-box;
+        }
+
+        /* Lado de atrás (Mazo) */
+        .card-back {
+            background-color: var(--card-back);
+            background-image: radial-gradient(circle, #34495e 20%, transparent 20%),
+                              radial-gradient(circle, #34495e 20%, transparent 20%);
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .card-back::after {
+            content: "♠♥♣♦";
+            font-size: 2rem;
+            opacity: 0.3;
+        }
+
+        /* Lado de adelante (Carta revelada) */
+        .card-front {
+            background-color: #fdfdfd;
+            color: #333;
+            transform: rotateY(180deg);
+        }
+
+        .card-value {
+            font-size: 2rem;
+            font-weight: bold;
+            position: absolute;
+            top: 10px;
+            left: 10px;
+        }
+
+        .card-suit-main {
+            font-size: 5rem;
+        }
+
+        .suit-oros { color: var(--gold); }
+        .suit-copas { color: var(--cup); }
+        .suit-espadas { color: var(--sword); }
+        .suit-bastos { color: var(--club); }
+
+        button {
+            margin-top: 30px;
+            padding: 10px 20px;
+            font-size: 1rem;
+            background: #e67e22;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover { background: #d35400; }
+        
+        #info { margin-top: 15px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <h1>La China</h1>
+    <p>Toca el mazo para sacar una carta</p>
+
+    <div class="card-container" onclick="sacarCarta()">
+        <div class="card" id="card-element">
+            <div class="card-face card-back"></div>
+            <div class="card-face card-front" id="card-content">
+                <div class="card-value" id="val-top"></div>
+                <div class="card-suit-main" id="suit-main"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="info">Cartas restantes: 40</div>
+    <button onclick="reiniciarMazo()">Reiniciar Mazo</button>
+
+    <script>
+        const palos = [
+            { nombre: 'Oros', simbolo: '🟡', clase: 'suit-oros' },
+            { nombre: 'Copas', simbolo: '🍷', clase: 'suit-copas' },
+            { nombre: 'Espadas', simbolo: '⚔️', clase: 'suit-espadas' },
+            { nombre: 'Bastos', simbolo: '🪵', clase: 'suit-bastos' }
+        ];
+        const valores = ['1', '2', '3', '4', '5', '6', '7', 'Sota', 'Caballo', 'Rey'];
+        
+        let mazo = [];
+        let bloqueado = false;
+
+        function crearMazo() {
+            mazo = [];
+            for (let palo of palos) {
+                for (let valor of valores) {
+                    mazo.push({ valor, ...palo });
+                }
+            }
+            actualizarContador();
+        }
+
+        function sacarCarta() {
+            if (bloqueado || mazo.length === 0) return;
+            bloqueado = true;
+
+            const cardElement = document.getElementById('card-element');
+            
+            // Si ya está dada vuelta, primero la reseteamos visualmente
+            if (cardElement.classList.contains('flipped')) {
+                cardElement.classList.remove('flipped');
+                setTimeout(mostrarNuevaCarta, 300);
+            } else {
+                mostrarNuevaCarta();
+            }
+        }
+
+        function mostrarNuevaCarta() {
+            const index = Math.floor(Math.random() * mazo.length);
+            const carta = mazo.splice(index, 1)[0];
+
+            // Actualizar contenido visual
+            document.getElementById('val-top').innerText = carta.valor;
+            const mainSuit = document.getElementById('suit-main');
+            mainSuit.innerText = carta.simbolo;
+            mainSuit.className = 'card-suit-main ' + carta.clase;
+
+            // Girar la carta
+            document.getElementById('card-element').classList.add('flipped');
+            
+            actualizarContador();
+            setTimeout(() => { bloqueado = false; }, 600);
+        }
+
+        function actualizarContador() {
+            document.getElementById('info').innerText = `Cartas restantes: ${mazo.length}`;
+            if (mazo.length === 0) {
+                document.getElementById('info').innerText = "¡Mazo vacío! Reinicia para jugar de nuevo.";
+            }
+        }
+
+        function reiniciarMazo() {
+            const cardElement = document.getElementById('card-element');
+            cardElement.classList.remove('flipped');
+            setTimeout(() => {
+                crearMazo();
+                alert("Mazo mezclado y listo.");
+            }, 300);
+        }
+
+        // Inicializar al cargar
+        crearMazo();
+    </script>
+</body>
+</html>
