@@ -2,84 +2,127 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Juego La China - Cartas Argentinas</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La China - Cartas Argentinas</title>
     <style>
-        /* Recuperamos tu fondo y estilo original */
+        /* Volvemos al fondo verde original de tu captura */
         body {
-            background-color: #2c3e50; /* El color azulado de tu captura */
+            background-color: #0d2f1d; 
+            color: #f1c40f;
+            font-family: 'Georgia', serif;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
             margin: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: center;
         }
 
-        .mesa {
-            display: flex;
-            gap: 20px;
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 5px;
+            text-shadow: 2px 2px #000;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: #fff;
             margin-bottom: 30px;
         }
 
-        /* Estilo de la carta basado en tu imagen f259e9 */
+        /* La carta estilo "La China" */
+        .card-container {
+            perspective: 1000px;
+            margin-bottom: 30px;
+        }
+
         .card {
-            width: 160px;
-            height: 250px;
-            background: white;
-            border-radius: 12px;
-            position: relative;
+            width: 260px;
+            height: 400px;
+            background-color: #f3e5ab; /* Color crema de carta antigua */
+            border: 8px solid #fff;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             display: flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 5px 5px 15px rgba(0,0,0,0.5);
+            flex-direction: column;
+            padding: 20px;
+            position: relative;
+            box-sizing: border-box;
         }
 
         .card-number {
-            position: absolute;
-            font-size: 24px;
+            font-size: 2.5rem;
             font-weight: bold;
-            color: #333;
+            color: #2c3e50;
+            text-align: left;
         }
 
-        .top-left { top: 10px; left: 10px; }
-        .bottom-right { bottom: 10px; right: 10px; transform: rotate(180deg); }
-
-        /* Contenedor del dibujo central (tu ilustración) */
         .card-illustration {
-            width: 80%;
-            height: auto;
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         .card-illustration img {
-            width: 100%;
+            max-width: 85%;
             height: auto;
-            display: block;
+            /* Filtro opcional para que se integre con el papel antiguo */
+            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.2));
+        }
+
+        /* Estilo de los botones y contador */
+        .deck-info {
+            background-color: rgba(0,0,0,0.5);
+            padding: 10px 30px;
+            border-radius: 25px;
+            color: #fff;
+            font-size: 1.2rem;
+            margin-bottom: 20px;
         }
 
         button {
-            background-color: #e74c3c;
+            background-color: #d35400; /* Naranja original */
             color: white;
             border: none;
-            padding: 12px 24px;
-            font-size: 18px;
-            border-radius: 5px;
+            padding: 15px 40px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 8px;
             cursor: pointer;
-            transition: background 0.3s;
+            text-transform: uppercase;
+            box-shadow: 0 4px #a04000;
         }
 
-        button:hover { background-color: #c0392b; }
+        button:active {
+            box-shadow: 0 2px #a04000;
+            transform: translateY(2px);
+        }
     </style>
 </head>
 <body>
 
-    <div class="mesa" id="mesa">
-        </div>
+    <h1>LA CHINA</h1>
+    <p class="subtitle">Toca para revelar el destino</p>
 
-    <button onclick="repartir()">Repartir Cartas</button>
+    <div class="card-container" onclick="sacarCarta()">
+        <div class="card" id="current-card">
+            <div class="card-number" id="card-val">8</div>
+            <div class="card-illustration">
+                <img src="espada.png" id="card-img" alt="Palo">
+            </div>
+        </div>
+    </div>
+
+    <div class="deck-info">
+        Cartas en el mazo: <span id="deck-count">38</span>
+    </div>
+
+    <button onclick="mezclarMazo()">MEZCLAR MAZO</button>
 
     <script>
-        // CORRECCIÓN DE RUTAS: Según tu GitHub, están en la raíz
+        // Configuración de tus archivos subidos a GitHub
         const imagenesPalos = {
             'Espada': 'espada.png',
             'Oro': 'oro.png',
@@ -87,33 +130,41 @@
             'Basto': 'basto.png'
         };
 
+        let mazo = [];
         const valores = [1, 2, 3, 4, 5, 6, 7, 10, 11, 12];
         const palos = ['Espada', 'Oro', 'Copa', 'Basto'];
 
-        function repartir() {
-            const mesa = document.getElementById('mesa');
-            mesa.innerHTML = ''; // Limpiamos la mesa
-
-            for (let i = 0; i < 3; i++) {
-                const valor = valores[Math.floor(Math.random() * valores.length)];
-                const palo = palos[Math.floor(Math.random() * palos.length)];
-                const imgPath = imagenesPalos[palo];
-
-                const cardDiv = document.createElement('div');
-                cardDiv.className = 'card';
-                cardDiv.innerHTML = `
-                    <div class="card-number top-left">${valor}</div>
-                    <div class="card-illustration">
-                        <img src="${imgPath}" alt="${palo}">
-                    </div>
-                    <div class="card-number bottom-right">${valor}</div>
-                `;
-                mesa.appendChild(cardDiv);
+        function mezclarMazo() {
+            mazo = [];
+            for (let palo of palos) {
+                for (let valor of valores) {
+                    mazo.push({ valor, palo });
+                }
             }
+            // Mezcla aleatoria
+            mazo.sort(() => Math.random() - 0.5);
+            actualizarContador();
+            alert("Mazo mezclado");
         }
 
-        // Repartir automáticamente al cargar la página
-        window.onload = repartir;
+        function sacarCarta() {
+            if (mazo.length === 0) {
+                alert("¡No hay más cartas! Mezcla el mazo de nuevo.");
+                return;
+            }
+
+            const carta = mazo.pop();
+            document.getElementById('card-val').innerText = carta.valor;
+            document.getElementById('card-img').src = imagenesPalos[carta.palo];
+            actualizarContador();
+        }
+
+        function actualizarContador() {
+            document.getElementById('deck-count').innerText = mazo.length;
+        }
+
+        // Inicializar al cargar
+        mezclarMazo();
     </script>
 </body>
 </html>
