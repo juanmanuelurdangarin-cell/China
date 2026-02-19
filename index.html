@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ArgenPoly - Messi IA Edition</title>
+    <title>ArgenPoly - Super Board Edition</title>
     <style>
         :root {
             --primary: #FFD93D; --secondary: #6BCB77; --accent: #4D96FF; 
-            --danger: #FF6B6B; --bg: #f3e5ab; 
-            --font: 'Segoe UI', sans-serif;
+            --danger: #FF6B6B; --bg: #f3e5ab; --font: 'Segoe UI', sans-serif;
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -18,82 +17,82 @@
             margin: 0; padding: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden;
         }
 
-        /* MENU */
+        /* MENU INICIAL */
         #setup-menu {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(10px); z-index: 5000;
+            position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(10px); z-index: 5000;
             display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px;
         }
         .menu-card {
             background: white; padding: 30px; border-radius: 40px; border: 8px solid var(--primary);
-            box-shadow: 0 20px 0 rgba(0,0,0,0.1); width: 100%; max-width: 420px; text-align: center;
-        }
-        .input-group { margin-bottom: 15px; text-align: left; }
-        label { font-weight: 900; color: #555; font-size: 11px; text-transform: uppercase; }
-        input, select { 
-            width: 100%; padding: 12px; border-radius: 15px; border: 3px solid #eee; font-weight: bold; outline: none;
+            width: 100%; max-width: 420px; text-align: center;
         }
 
         /* JUEGO */
         #game-container { display: none; flex-direction: column; height: 100vh; }
-        #top-section { padding: 10px; display: flex; justify-content: center; flex-shrink: 0; }
+        
+        #top-section { 
+            padding: 5px; display: flex; justify-content: center; flex-shrink: 0; 
+            background: rgba(255,255,255,0.2);
+        }
+        
+        /* TABLERO AGRANDADO */
         #board {
             display: grid; grid-template-columns: repeat(6, 1fr); grid-template-rows: repeat(6, 1fr);
-            gap: 4px; width: 92vw; height: 92vw; max-width: 400px; max-height: 400px;
-            background: #fff; padding: 8px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            gap: 4px; width: 95vw; height: 95vw; max-width: 480px; max-height: 480px;
+            background: #fff; padding: 8px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
 
         .cell {
-            background: #fff; border: 1px solid #eee; border-radius: 4px;
-            position: relative; display: flex; flex-direction: column;
-            align-items: center; justify-content: flex-end; padding: 2px;
-            font-size: 7px; font-weight: 900; text-transform: uppercase;
+            background: #fff; border: 1px solid #eee; position: relative; 
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-end; 
+            padding: 2px; font-size: 8px; font-weight: 900; text-transform: uppercase;
         }
-        .cell-color { position: absolute; top: 0; width: 100%; height: 30%; border-radius: 2px 2px 0 0; }
+        .cell-color { position: absolute; top: 0; width: 100%; height: 30%; }
 
+        /* PANEL INFERIOR */
         #bottom-section {
-            flex: 1; background: #fff; border-radius: 40px 40px 0 0;
-            padding: 20px; display: flex; flex-direction: column;
-            box-shadow: 0 -15px 40px rgba(0,0,0,0.1); overflow-y: auto;
+            flex: 1; background: #fff; border-radius: 30px 30px 0 0;
+            padding: 15px; display: flex; flex-direction: column;
+            box-shadow: 0 -10px 30px rgba(0,0,0,0.1); overflow-y: auto;
         }
 
         .p-card {
-            min-width: 120px; padding: 10px; border-radius: 20px; background: #f8f9fa;
-            border-bottom: 5px solid #ccc; text-align: center; transition: 0.3s;
+            min-width: 110px; padding: 10px; border-radius: 15px; background: #f8f9fa;
+            border-bottom: 5px solid #ccc; text-align: center; cursor: pointer; transition: 0.2s;
         }
-        .p-card.active { border-bottom-color: var(--accent); background: #eef5ff; transform: translateY(-3px); }
+        .p-card.active { border-bottom-color: var(--accent); background: #eef5ff; transform: scale(1.05); }
 
         .btn {
-            width: 100%; padding: 18px; border: none; border-radius: 20px;
-            font-weight: 900; font-size: 16px; color: white; cursor: pointer;
-            text-transform: uppercase; margin-bottom: 10px; box-shadow: 0 5px 0 rgba(0,0,0,0.1);
+            width: 100%; padding: 15px; border: none; border-radius: 15px;
+            font-weight: 900; font-size: 14px; color: white; cursor: pointer;
+            text-transform: uppercase; margin-bottom: 8px;
         }
         .btn-roll { background: var(--accent); }
         .btn-buy { background: var(--secondary); }
-        .btn-end { background: #bbb; }
+        .btn-sell { background: var(--danger); font-size: 10px; padding: 8px; margin-top: 10px; }
 
         .prop-card {
-            background: #fff; border-radius: 18px; padding: 15px; margin-bottom: 10px;
+            background: #fff; border-radius: 15px; padding: 12px; margin-bottom: 10px;
             border: 2px solid #f0f0f0; border-left-width: 10px;
         }
         .rent-table { display: none; font-size: 11px; margin-top: 10px; grid-template-columns: 1fr 1fr; gap: 5px; border-top: 1px dashed #eee; padding-top: 10px; }
         .prop-card.expanded .rent-table { display: grid; }
 
         #log {
-            background: #fdfdfd; padding: 10px; border-radius: 15px; height: 60px;
-            font-size: 10px; overflow-y: auto; margin-bottom: 10px; border: 2px solid #eee;
+            background: #fdfdfd; padding: 8px; border-radius: 12px; height: 50px;
+            font-size: 10px; overflow-y: auto; margin-bottom: 10px; border: 1px solid #eee;
         }
 
         .token {
-            width: 18px; height: 18px; border-radius: 50%; border: 2px solid white;
-            position: absolute; z-index: 100; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+            width: 20px; height: 20px; border-radius: 50%; border: 2px solid white;
+            position: absolute; z-index: 100; transition: 0.3s; box-shadow: 0 3px 6px rgba(0,0,0,0.3);
         }
 
         @media (min-width: 1024px) {
             #game-container { flex-direction: row; }
-            #top-section { flex: 1.2; height: 100vh; }
-            #bottom-section { flex: 0.8; height: 100vh; border-radius: 40px 0 0 40px; }
-            #board { width: 38vw; height: 38vw; }
+            #top-section { flex: 1.1; height: 100vh; align-items: center; }
+            #bottom-section { flex: 0.9; height: 100vh; border-radius: 0; }
+            #board { width: 42vw; height: 42vw; }
         }
     </style>
 </head>
@@ -102,28 +101,22 @@
 <div id="setup-menu">
     <div class="menu-card">
         <h1 style="color: var(--accent); margin:0;">🇦🇷 ARGENPOLY</h1>
-        <p style="font-weight:900; color: var(--secondary); margin-bottom:20px;">EDICIÓN MESSI IA</p>
-        
-        <div class="input-group">
-            <label>Velocidad de Juego</label>
-            <select id="speed-select">
-                <option value="400">Tranquilo</option>
+        <p style="font-weight:900; color: var(--secondary);">TABLERO GIGANTE</p>
+        <div style="text-align:left; margin-top:15px;">
+            <label style="font-size:10px; font-weight:bold; color:#666;">JUGADORES</label>
+            <select id="player-qty" onchange="generateNameInputs()" style="width:100%; padding:10px; border-radius:10px; margin-bottom:10px;">
+                <option value="1">1 vs Messi</option>
+                <option value="2">2 vs Messi</option>
+            </select>
+            <div id="names-container"></div>
+            <label style="font-size:10px; font-weight:bold; color:#666;">VELOCIDAD</label>
+            <select id="speed-select" style="width:100%; padding:10px; border-radius:10px;">
+                <option value="400">Tranqui</option>
                 <option value="200" selected>Normal</option>
-                <option value="50">Super Sónico</option>
+                <option value="80">Turbo</option>
             </select>
         </div>
-
-        <div class="input-group">
-            <label>Cantidad de Jugadores</label>
-            <select id="player-qty" onchange="generateNameInputs()">
-                <option value="1">1 Jugador vs Messi</option>
-                <option value="2">2 Jugadores vs Messi</option>
-                <option value="3">3 Jugadores vs Messi</option>
-            </select>
-        </div>
-
-        <div id="names-container"></div>
-        <button class="btn btn-roll" onclick="initGame()" style="margin-top:10px;">¡JUGAR!</button>
+        <button class="btn btn-roll" onclick="initGame()" style="margin-top:20px;">¡COMENZAR!</button>
     </div>
 </div>
 
@@ -132,22 +125,22 @@
         <div id="board">
             <div style="grid-column: 2/6; grid-row: 2/6; display: flex; flex-direction: column; align-items: center; justify-content: center;">
                 <div id="dice-val" style="font-size: 50px;">🎲</div>
-                <div id="turn-label" style="font-weight:900; color:var(--accent); font-size:11px; background:#f0f0f0; padding:4px 12px; border-radius:15px;"></div>
+                <div id="turn-label" style="font-weight:bold; color:var(--accent); font-size:10px; text-align:center;"></div>
             </div>
         </div>
     </div>
 
     <div id="bottom-section">
-        <div class="player-chips" id="players-list" style="display:flex; gap:10px; overflow-x:auto; padding-bottom:10px; flex-shrink:0;"></div>
+        <div class="player-chips" id="players-list" style="display:flex; gap:8px; overflow-x:auto; padding-bottom:5px;"></div>
         <div id="log"></div>
         <div id="action-btns">
-            <button id="roll-btn" class="btn btn-roll" onclick="playTurn()">🎲 LANZAR DADOS</button>
+            <button id="roll-btn" class="btn btn-roll" onclick="playTurn()">🎲 TIRAR</button>
             <button id="buy-btn" class="btn btn-buy" style="display:none;" onclick="buyCurrentTile()">💰 COMPRAR</button>
-            <button id="end-btn" class="btn btn-end" style="display:none;" onclick="finishTurn()">⏭ PASAR TURNO</button>
+            <button id="end-btn" class="btn" style="display:none; background:#888;" onclick="finishTurn()">⏭ PASAR</button>
         </div>
-        <h3 style="margin:15px 0 10px; font-size:12px; color:#666; text-transform:uppercase;">Mis Propiedades</h3>
+        <h3 id="prop-view-title" style="margin:10px 0; font-size:12px; color:#555; text-transform:uppercase;">MIS PROPIEDADES</h3>
         <div id="prop-list"></div>
-        <div style="height: 80px; flex-shrink: 0;"></div>
+        <div style="height: 60px;"></div>
     </div>
 </div>
 
@@ -177,27 +170,23 @@
 
     let players = [];
     let turn = 0;
+    let viewingPlayerIndex = 0;
     let gameSpeed = 200;
-    const colors = ["#4D96FF", "#FF6B6B", "#6BCB77", "#9C2CF3"];
 
     function generateNameInputs() {
         const qty = document.getElementById('player-qty').value;
         const container = document.getElementById('names-container');
         container.innerHTML = '';
-        for(let i=0; i<qty; i++){
-            container.innerHTML += `<div class="input-group"><label>Jugador ${i+1}</label><input type="text" id="p${i}-name" placeholder="Tu nombre..."></div>`;
-        }
+        for(let i=0; i<qty; i++) container.innerHTML += `<input type="text" id="p${i}-name" placeholder="Nombre J${i+1}" style="width:100%; padding:10px; border-radius:10px; margin-bottom:5px;">`;
     }
 
     function initGame() {
         const qty = parseInt(document.getElementById('player-qty').value);
         gameSpeed = parseInt(document.getElementById('speed-select').value);
         players = [];
-        for(let i=0; i<qty; i++) {
-            players.push({ id: i, name: document.getElementById(`p${i}-name`).value || `Jugador ${i+1}`, money: 1500, pos: 0, color: colors[i], props: [], isBot: false });
-        }
+        for(let i=0; i<qty; i++) players.push({ id: i, name: document.getElementById(`p${i}-name`).value || `J${i+1}`, money: 1500, pos: 0, color: ["#4D96FF","#FF6B6B","#6BCB77"][i], props: [], isBot: false });
         players.push({ id: players.length, name: "Messi", money: 1500, pos: 0, color: "#555", props: [], isBot: true });
-
+        viewingPlayerIndex = 0;
         document.getElementById('setup-menu').style.display = 'none';
         document.getElementById('game-container').style.display = 'flex';
         renderBoard();
@@ -242,43 +231,28 @@
     function handleLanding(p) {
         const tile = config[p.pos];
         const owner = players.find(x => x.props.includes(tile.n));
-        
         if(owner && owner !== p) {
             const rent = tile.r[0];
             p.money -= rent; owner.money += rent;
             addLog(`${p.name} pagó $${rent} a ${owner.name}`);
-            checkAutoNext(p);
         } else if(!owner && tile.pr) {
-            if(p.isBot) { 
-                if(p.money > tile.pr + 400) { buyCurrentTile(); }
-                setTimeout(finishTurn, 1000);
-            } else {
-                document.getElementById('buy-btn').style.display = 'block';
-                document.getElementById('end-btn').style.display = 'block';
-            }
-        } else {
-            checkAutoNext(p);
+            if(p.isBot) { if(p.money > tile.pr + 400) buyCurrentTile(); }
+            else document.getElementById('buy-btn').style.display = 'block';
         }
-        updateUI();
-    }
-
-    function checkAutoNext(p) {
+        viewingPlayerIndex = turn;
         if(p.isBot) setTimeout(finishTurn, 1000);
         else document.getElementById('end-btn').style.display = 'block';
+        updateUI();
     }
 
     function buyCurrentTile() {
         const p = players[turn];
         const tile = config[p.pos];
         if(p.money >= tile.pr) {
-            p.money -= tile.pr;
-            p.props.push(tile.n);
+            p.money -= tile.pr; p.props.push(tile.n);
             addLog(`${p.name} compró ${tile.n}`);
             document.getElementById('buy-btn').style.display = 'none';
             updateUI();
-            if(p.isBot) { /* Messi no necesita tocar nada más */ }
-        } else if(!p.isBot) {
-            alert("¡No tenés suficiente plata!");
         }
     }
 
@@ -287,24 +261,35 @@
         document.getElementById('end-btn').style.display = 'none';
         document.getElementById('roll-btn').disabled = false;
         turn = (turn + 1) % players.length;
+        viewingPlayerIndex = turn;
         updateUI();
-        if(players[turn].isBot) {
-            addLog("Turno de Messi...");
-            setTimeout(playTurn, 1000);
-        }
+        if(players[turn].isBot) setTimeout(playTurn, 1000);
     }
 
     function updateUI() {
         const pList = document.getElementById('players-list');
         pList.innerHTML = '';
         players.forEach((p, i) => {
-            pList.innerHTML += `<div class="p-card ${turn===i?'active':''}"><div style="font-size:10px; color:#888">${p.name==='Messi'?'IA':'JUGADOR'}</div><div style="font-weight:900">${p.name}</div><div style="color:#28a745; font-weight:900">$${p.money}</div></div>`;
+            pList.innerHTML += `<div class="p-card ${turn===i?'active':''}" onclick="viewPlayerProps(${i})"><div style="font-size:9px; color:#888">${p.name}</div><div style="font-weight:900">$${p.money}</div></div>`;
         });
-        document.getElementById('turn-label').innerText = `TURNO DE: ${players[turn].name}`;
-        
-        const propList = document.getElementById('prop-list');
-        propList.innerHTML = '';
-        players[turn].props.forEach(propName => {
+        document.getElementById('turn-label').innerText = `TURNO DE ${players[turn].name.toUpperCase()}`;
+        renderPropList();
+    }
+
+    function viewPlayerProps(index) {
+        viewingPlayerIndex = index;
+        renderPropList();
+    }
+
+    function renderPropList() {
+        const p = players[viewingPlayerIndex];
+        const title = document.getElementById('prop-view-title');
+        title.innerText = `PROPIEDADES DE ${p.name.toUpperCase()}`;
+        title.style.color = p.color;
+
+        const list = document.getElementById('prop-list');
+        list.innerHTML = '';
+        p.props.forEach(propName => {
             const tile = config.find(c => c.n === propName);
             const card = document.createElement('div');
             card.className = 'prop-card'; card.style.borderLeftColor = tile.c;
@@ -315,10 +300,19 @@
                     <span>🏠 Renta:</span><b>$${tile.r[0]}</b>
                     <span>🏨 1 Hotel:</span><b>$${tile.r[1]}</b>
                     <span>🏨 2 Hoteles:</span><b>$${tile.r[2]}</b>
-                    <span>🏨 3 Hoteles:</span><b>$${tile.r[3]}</b>
+                    ${viewingPlayerIndex === turn && !players[turn].isBot ? `<button class="btn btn-sell" onclick="event.stopPropagation(); sellProp('${tile.n}')">VENDER POR $${tile.pr/2}</button>` : ''}
                 </div>`;
-            propList.appendChild(card);
+            list.appendChild(card);
         });
+    }
+
+    function sellProp(name) {
+        const p = players[turn];
+        const tile = config.find(c => c.n === name);
+        p.money += (tile.pr / 2);
+        p.props = p.props.filter(n => n !== name);
+        addLog(`Vendiste ${name}`);
+        updateUI();
     }
 
     function updateTokenPos() {
@@ -333,7 +327,7 @@
 
     function addLog(msg) {
         const l = document.getElementById('log');
-        l.innerHTML = `<div style="margin-bottom:2px">• ${msg}</div>` + l.innerHTML;
+        l.innerHTML = `<div>• ${msg}</div>` + l.innerHTML;
         l.scrollTop = 0;
     }
 
