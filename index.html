@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ArgenPoly - Federal Edition</title>
+    <title>ArgenPoly - Pro Edition</title>
     <style>
         :root { --bg: #0f172a; --panel: #ffffff; --primary: #0081C9; --accent: #f59e0b; --danger: #ef4444; }
         * { box-sizing: border-box; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; color: #1e293b; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; color: #1e293b; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow: hidden; }
 
         /* MENU */
-        #setup-menu { background: white; padding: 30px; border-radius: 20px; width: 95%; max-width: 450px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        #setup-menu { background: white; padding: 30px; border-radius: 20px; width: 95%; max-width: 450px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5); z-index: 1000; }
         .input-group { margin: 10px 0; text-align: left; }
-        input, select { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; }
+        input, select { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 14px; }
 
         /* JUEGO */
         #game-container { display: none; flex-direction: column; width: 100%; max-width: 1200px; height: 98vh; gap: 10px; padding: 10px; }
@@ -27,10 +27,10 @@
         .hotels-row { display: flex; gap: 1px; position: absolute; top: 22%; width: 100%; justify-content: center; }
         .hotel-dot { width: 5px; height: 5px; background: #e11d48; border-radius: 50%; display: none; border: 1px solid white; }
 
-        .token { width: 14px; height: 14px; border-radius: 50%; border: 2px solid white; position: absolute; z-index: 100; transition: all 0.4s; box-shadow: 0 2px 4px rgba(0,0,0,0.4); }
+        .token { width: 16px; height: 16px; border-radius: 50%; border: 2px solid white; position: absolute; z-index: 100; transition: all 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28); box-shadow: 0 2px 4px rgba(0,0,0,0.4); }
 
         .ui-panel { flex: 1; background: white; border-radius: 15px; padding: 15px; display: flex; flex-direction: column; overflow: hidden; }
-        #log { height: 100px; background: #1e293b; color: #38bdf8; padding: 8px; font-family: monospace; font-size: 10px; overflow-y: auto; border-radius: 8px; margin: 5px 0; }
+        #log { height: 110px; background: #1e293b; color: #38bdf8; padding: 8px; font-family: monospace; font-size: 10px; overflow-y: auto; border-radius: 8px; margin: 5px 0; border: 2px solid #334155; }
 
         .tabs { display: flex; gap: 4px; margin-bottom: 8px; overflow-x: auto; padding-bottom: 4px; }
         .tab { padding: 6px 12px; border-radius: 6px; background: #f1f5f9; cursor: pointer; font-size: 11px; white-space: nowrap; font-weight: bold; }
@@ -40,19 +40,31 @@
         .prop-item { padding: 8px; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 6px; font-size: 11px; background: #f8fafc; }
         
         .btn-main { background: var(--primary); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.2s; }
-        .btn-main:disabled { background: #94a3b8; cursor: not-allowed; }
+        .btn-main:disabled { background: #94a3b8; cursor: not-allowed; opacity: 0.7; }
+        
         .btn-hotel { background: #10b981; color: white; border: none; padding: 4px; border-radius: 4px; font-size: 9px; cursor: pointer; width: 100%; margin-top: 4px; }
         .btn-sell { background: var(--danger); color: white; border: none; padding: 4px; border-radius: 4px; font-size: 9px; cursor: pointer; width: 100%; margin-top: 2px; }
 
         .center-ui { grid-column: 2/6; grid-row: 2/6; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #f8fafc; border-radius: 10px; border: 2px dashed #cbd5e1; }
-        .player-out { opacity: 0.5; text-decoration: line-through; }
+        
+        /* ANIMACION DADO */
+        #dice-val { transition: transform 0.4s; }
+        .rolling { animation: rotateDice 0.4s infinite; }
+        @keyframes rotateDice {
+            0% { transform: rotate(0deg) scale(1); }
+            50% { transform: rotate(180deg) scale(1.2); }
+            100% { transform: rotate(360deg) scale(1); }
+        }
+
+        .alert-deuda { background: #fee2e2; border: 2px solid var(--danger); color: var(--danger); padding: 10px; border-radius: 8px; font-weight: bold; font-size: 12px; margin-bottom: 10px; text-align: center; }
+        .player-out { opacity: 0.5; text-decoration: line-through; filter: grayscale(1); }
     </style>
 </head>
 <body>
 
 <div id="setup-menu">
     <h2 style="color: var(--primary); margin: 0;">🇦🇷 ARGENPOLY</h2>
-    <p style="font-size: 12px; color: #64748b;">Vende tus propiedades si te quedas sin fondos</p>
+    <p style="font-size: 12px; color: #64748b;">Mantené tu cuenta en positivo para seguir viajando</p>
     
     <div class="input-group">
         <label>Modo de Juego</label>
@@ -62,6 +74,15 @@
         </select>
     </div>
     
+    <div class="input-group">
+        <label>Velocidad de Juego</label>
+        <select id="speed-select">
+            <option value="400">Normal (x1)</option>
+            <option value="250">Rápido (x1.5)</option>
+            <option value="150">Turbo (x2)</option>
+        </select>
+    </div>
+
     <div id="multi-options" style="display:none">
         <div class="input-group">
             <label>Cantidad de Jugadores</label>
@@ -74,9 +95,7 @@
     </div>
 
     <div id="player-names">
-        <div class="input-group">
-            <input type="text" id="p0-name" placeholder="Tu Nombre">
-        </div>
+        <div class="input-group"><input type="text" id="p0-name" placeholder="Tu Nombre"></div>
     </div>
     
     <button class="btn-main" onclick="initGame()">COMENZAR PARTIDA</button>
@@ -84,23 +103,25 @@
 
 <div id="game-container">
     <div class="ui-panel">
-        <h3 style="margin:0 0 10px 0">Estado del Viaje</h3>
+        <h3 style="margin:0 0 10px 0">Jugadores</h3>
         <div id="players-list"></div>
         <div id="log"></div>
-        <button id="roll-btn" class="btn-main" onclick="playTurn()">🎲 LANZAR DADOS</button>
+        <div id="turn-action-container">
+            <button id="roll-btn" class="btn-main" onclick="playTurn()">🎲 LANZAR DADOS</button>
+        </div>
     </div>
 
     <div id="board-wrapper">
         <div id="board">
             <div class="center-ui">
-                <div id="dice-val" style="font-size:40px; margin-bottom:10px">🎲</div>
+                <div id="dice-val" style="font-size:50px; margin-bottom:10px">🎲</div>
                 <div id="current-p-label" style="font-weight:900; color:var(--primary); text-align:center"></div>
             </div>
         </div>
     </div>
 
     <div class="ui-panel">
-        <h3 style="margin:0 0 10px 0">Gestión de Bienes</h3>
+        <h3 style="margin:0 0 10px 0">Propiedades</h3>
         <div class="tabs" id="tabs-container"></div>
         <div id="prop-list"></div>
     </div>
@@ -133,6 +154,7 @@
     let players = [];
     let turn = 0;
     let viewTab = 0;
+    let gameSpeed = 400;
     const pColors = ["#ef4444", "#3b82f6", "#10b981", "#f59e0b"];
 
     function toggleInputs() {
@@ -154,11 +176,13 @@
     function initGame() {
         const mode = document.getElementById('mode-select').value;
         const qty = mode === 'bot' ? 1 : parseInt(document.getElementById('player-qty').value);
+        gameSpeed = parseInt(document.getElementById('speed-select').value);
+        
         players = [];
         for(let i=0; i<qty; i++) {
-            players.push({ id: i, name: document.getElementById(`p${i}-name`).value || `Jugador ${i+1}`, money: 2500, pos: 0, color: pColors[i], props: [], hotels: {}, isBot: false, isOut: false });
+            players.push({ id: i, name: document.getElementById(`p${i}-name`).value || `Jugador ${i+1}`, money: 2000, pos: 0, color: pColors[i], props: [], hotels: {}, isBot: false, isOut: false });
         }
-        if(mode === 'bot') players.push({ id: players.length, name: "Servidor", money: 2500, pos: 0, color: pColors[players.length], props: [], hotels: {}, isBot: true, isOut: false });
+        if(mode === 'bot') players.push({ id: players.length, name: "Servidor", money: 2000, pos: 0, color: pColors[players.length], props: [], hotels: {}, isBot: true, isOut: false });
         
         document.getElementById('setup-menu').style.display = 'none';
         document.getElementById('game-container').style.display = 'flex';
@@ -188,23 +212,32 @@
 
     async function playTurn() {
         const p = players[turn];
-        if(p.isOut) { nextTurn(); return; }
+        if(p.isOut || p.money < 0) return;
 
+        const diceEl = document.getElementById('dice-val');
+        diceEl.classList.add('rolling');
         document.getElementById('roll-btn').disabled = true;
+
+        await new Promise(r => setTimeout(r, 600));
         const roll = Math.floor(Math.random() * 6) + 1;
-        document.getElementById('dice-val').innerText = ['⚀','⚁','⚂','⚃','⚄','⚅'][roll-1];
+        diceEl.classList.remove('rolling');
+        diceEl.innerText = ['⚀','⚁','⚂','⚃','⚄','⚅'][roll-1];
 
         for(let i=0; i<roll; i++) {
             p.pos = (p.pos + 1) % config.length;
             updateTokenPos();
             if(p.pos === 0) { p.money += 200; addLog(`${p.name} cobró $200 de salida`); }
-            await new Promise(r => setTimeout(r, 200));
+            await new Promise(r => setTimeout(r, gameSpeed / 2));
         }
+        
         handleLanding(p);
         updateUI();
 
-        if(!checkBancarrota(p)) {
-            nextTurn();
+        if(p.money >= 0) {
+            setTimeout(nextTurn, gameSpeed);
+        } else {
+            addLog(`⚠️ ${p.name} está en BANCARROTA. Debe vender propiedades.`);
+            if(p.isBot) botResolveDebt(p);
         }
     }
 
@@ -213,37 +246,21 @@
         if(!tile.pr) return;
         const owner = players.find(x => x.props.includes(tile.n));
         
-        if(owner && owner !== p) {
+        if(owner && owner !== p && !owner.isOut) {
             const rent = tile.r * (1 + (owner.hotels[tile.n] || 0));
             p.money -= rent; owner.money += rent;
-            addLog(`${p.name} pagó $${rent} a ${owner.name}`);
+            addLog(`${p.name} pagó $${rent} de renta a ${owner.name}`);
         } else if(!owner && p.money >= tile.pr) {
-            if(!p.isBot || p.money > 1000) {
+            if(!p.isBot || p.money > 800) {
                 p.money -= tile.pr; p.props.push(tile.n);
                 addLog(`${p.name} compró ${tile.n}`);
             }
         }
     }
 
-    function checkBancarrota(p) {
-        if(p.money < 0) {
-            if(p.props.length === 0) {
-                eliminarJugador(p);
-                return true;
-            } else {
-                addLog(`⚠️ ${p.name} está en deuda! Vende propiedades.`);
-                if(p.isBot) {
-                    while(p.money < 0 && p.props.length > 0) sellProp(p.id, p.props[0]);
-                    if(p.money < 0) eliminarJugador(p);
-                    return false;
-                }
-                return false;
-            }
-        }
-        return false;
-    }
-
     function sellProp(pId, propName) {
+        if(!confirm(`¿Deseas vender ${propName} por el 50% de su valor?`)) return;
+        
         const p = players[pId];
         const tile = config.find(c => c.n === propName);
         const sellValue = Math.floor(tile.pr / 2);
@@ -252,26 +269,43 @@
         p.props = p.props.filter(n => n !== propName);
         delete p.hotels[propName];
         
-        // Limpiar visual en tablero
+        // Limpiar visual
         const idx = config.indexOf(tile);
         const dots = document.querySelectorAll(`#h-${idx} .hotel-dot`);
         dots.forEach(d => d.style.display = 'none');
 
         addLog(`💰 ${p.name} vendió ${propName} por $${sellValue}`);
         updateUI();
+
+        // Si el jugador actual saldó su deuda, habilitar continuación
+        if(p.money >= 0 && turn === pId) {
+            addLog(`✅ Deuda saldada. Turno finalizado.`);
+            setTimeout(nextTurn, 1000);
+        }
+    }
+
+    function botResolveDebt(p) {
+        while(p.money < 0 && p.props.length > 0) {
+            const prop = p.props[0];
+            const tile = config.find(c => c.n === prop);
+            p.money += Math.floor(tile.pr / 2);
+            p.props.shift();
+            delete p.hotels[prop];
+            addLog(`🤖 Servidor vendió ${prop} para pagar deuda.`);
+        }
+        if(p.money < 0) eliminarJugador(p);
+        else nextTurn();
     }
 
     function eliminarJugador(p) {
         p.isOut = true;
-        p.money = 0;
-        p.props = [];
-        p.hotels = {};
+        p.money = -999999;
         document.getElementById(`tk-${p.id}`).style.display = 'none';
-        addLog(`❌ ${p.name} ha quedado fuera de juego!`);
+        addLog(`❌ ${p.name} ha sido ELIMINADO del juego.`);
         
         const activos = players.filter(pl => !pl.isOut);
         if(activos.length === 1) {
-            alert(`¡EL GANADOR ES ${activos[0].name.toUpperCase()}!`);
+            alert(`¡JUEGO TERMINADO! EL GANADOR ES ${activos[0].name.toUpperCase()}`);
             location.reload();
         }
         nextTurn();
@@ -279,11 +313,10 @@
 
     function nextTurn() {
         turn = (turn + 1) % players.length;
-        if(players[turn].isOut) { nextTurn(); return; }
+        if(players[turn].isOut) return nextTurn();
         
         updateUI();
-        if(players[turn].isBot) setTimeout(playTurn, 1000);
-        else document.getElementById('roll-btn').disabled = false;
+        if(players[turn].isBot) setTimeout(playTurn, gameSpeed * 2);
     }
 
     function buildHotel(propName) {
@@ -294,7 +327,6 @@
         if(p.money >= cost && current < 4) {
             p.money -= cost;
             p.hotels[propName] = current + 1;
-            addLog(`🏨 Hotel en ${propName}`);
             const dots = document.querySelectorAll(`#h-${config.indexOf(tile)} .hotel-dot`);
             dots[current].style.display = 'block';
             updateUI();
@@ -321,10 +353,27 @@
         const pList = document.getElementById('players-list');
         pList.innerHTML = '';
         players.forEach((p, i) => {
-            pList.innerHTML += `<div class="${p.isOut?'player-out':''} " style="border-left:5px solid ${p.color}; padding:5px; margin-bottom:5px; background:${turn===i?'#e0f2fe':'#f1f5f9'}; font-size:12px"><b>${p.name}</b>: $${p.money}</div>`;
+            const isTurn = turn === i;
+            pList.innerHTML += `<div class="${p.isOut?'player-out':''} " style="border-left:5px solid ${p.color}; padding:8px; margin-bottom:5px; background:${isTurn?'#e0f2fe':'#f1f5f9'}; font-size:12px">
+                <b>${p.name}</b>: <span style="color:${p.money<0?'red':'black'}">$${p.money}</span>
+            </div>`;
         });
-        document.getElementById('current-p-label').innerText = "TURNO DE: " + players[turn].name;
+        
+        const activeP = players[turn];
+        document.getElementById('current-p-label').innerText = "TURNO DE: " + activeP.name;
 
+        // Manejo del botón de dados y alertas de deuda
+        const btnContainer = document.getElementById('turn-action-container');
+        if(activeP.money < 0 && !activeP.isBot) {
+            btnContainer.innerHTML = `<div class="alert-deuda">ESTÁS EN DEUDA ($${activeP.money})<br>Vende propiedades para continuar o perderás.</div>`;
+            if(activeP.props.length === 0) {
+                btnContainer.innerHTML += `<button class="btn-main" style="background:black" onclick="eliminarJugador(players[turn])">DECLARAR BANCARROTA</button>`;
+            }
+        } else {
+            btnContainer.innerHTML = `<button id="roll-btn" class="btn-main" onclick="playTurn()" ${activeP.isBot?'disabled':''}>🎲 LANZAR DADOS</button>`;
+        }
+
+        // Pestañas
         const tCont = document.getElementById('tabs-container');
         tCont.innerHTML = '';
         players.forEach((p, i) => {
@@ -335,6 +384,7 @@
             tCont.appendChild(tab);
         });
 
+        // Propiedades
         const propList = document.getElementById('prop-list');
         propList.innerHTML = '';
         const viewer = players[viewTab];
@@ -345,8 +395,8 @@
             propList.innerHTML += `
                 <div class="prop-item" style="border-top:4px solid ${tile.c}">
                     <b>${pName}</b> <small>(${tile.prov})</small><br>
-                    Renta: $${tile.r * (1+hCount)} | Hoteles: ${hCount}/4<br>
-                    ${hasMonopoly && hCount < 4 && viewer.id === turn && !viewer.isBot ? `<button class="btn-hotel" onclick="buildHotel('${pName}')">Mejorar ($${Math.floor(tile.pr*0.7)})</button>` : ''}
+                    Renta: $${tile.r * (1+hCount)}<br>
+                    ${hasMonopoly && hCount < 4 && viewer.id === turn && !viewer.isBot ? `<button class="btn-hotel" onclick="buildHotel('${pName}')">Poner Hotel ($${Math.floor(tile.pr*0.7)})</button>` : ''}
                     ${viewer.id === turn && !viewer.isBot ? `<button class="btn-sell" onclick="sellProp(${viewer.id}, '${pName}')">Vender por $${Math.floor(tile.pr/2)}</button>` : ''}
                 </div>`;
         });
