@@ -3,184 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ArgenPoly - Pro Edition</title>
+    <title>ArgenPoly - Federal Edition</title>
     <style>
-        :root {
-            --bg: #0f172a;
-            --panel: #ffffff;
-            --primary: #0081C9;
-            --accent: #f59e0b;
-        }
-
+        :root { --bg: #0f172a; --panel: #ffffff; --primary: #0081C9; --accent: #f59e0b; }
         * { box-sizing: border-box; }
-        body { 
-            font-family: 'Segoe UI', sans-serif; 
-            background: var(--bg); 
-            margin: 0; 
-            color: #1e293b;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; color: #1e293b; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
 
-        /* MENU INICIAL */
-        #setup-menu {
-            background: white;
-            padding: 30px;
-            border-radius: 20px;
-            width: 90%;
-            max-width: 400px;
-            text-align: center;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-            z-index: 1000;
-        }
-
-        .input-group { margin: 15px 0; text-align: left; }
+        /* MENU */
+        #setup-menu { background: white; padding: 30px; border-radius: 20px; width: 95%; max-width: 450px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        .input-group { margin: 10px 0; text-align: left; }
         input, select { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; }
 
-        /* LAYOUT PRINCIPAL */
-        #game-container {
-            display: none;
-            flex-direction: column;
-            width: 100%;
-            max-width: 1200px;
-            height: 95vh;
-            gap: 10px;
-            padding: 10px;
-        }
+        /* JUEGO */
+        #game-container { display: none; flex-direction: column; width: 100%; max-width: 1200px; height: 98vh; gap: 10px; padding: 10px; }
+        @media (min-width: 1024px) { #game-container { flex-direction: row; } }
 
-        @media (min-width: 1024px) {
-            #game-container { flex-direction: row; }
-        }
+        #board-wrapper { flex: 1.5; background: #cbd5e1; border-radius: 15px; position: relative; aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; }
+        #board { display: grid; grid-template-columns: repeat(6, 1fr); grid-template-rows: repeat(6, 1fr); gap: 2px; width: 100%; height: 100%; padding: 5px; }
 
-        /* TABLERO CUADRADO RESPONSIVO */
-        #board-wrapper {
-            flex: 2;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: #e2e8f0;
-            border-radius: 15px;
-            position: relative;
-            aspect-ratio: 1/1;
-        }
-
-        #board {
-            display: grid;
-            grid-template-columns: repeat(6, 1fr);
-            grid-template-rows: repeat(6, 1fr);
-            gap: 2px;
-            width: 100%;
-            height: 100%;
-            padding: 5px;
-        }
-
-        .cell {
-            background: white;
-            border: 1px solid #ddd;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-end;
-            font-size: clamp(8px, 1.5vw, 10px);
-            font-weight: bold;
-            position: relative;
-            padding-bottom: 2px;
-        }
-
+        .cell { background: white; border: 1px solid #ddd; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; font-size: clamp(7px, 1.2vw, 9px); font-weight: bold; position: relative; padding: 2px; text-align: center; }
         .cell-color { position: absolute; top: 0; width: 100%; height: 20%; }
         
-        /* HOTELES */
-        .hotels-row {
-            display: flex;
-            gap: 1px;
-            position: absolute;
-            top: 22%;
-            width: 100%;
-            justify-content: center;
-        }
-        .hotel-dot { width: 6px; height: 6px; background: red; border-radius: 50%; display: none; }
-        .has-hotel .hotel-dot { display: block; }
+        .hotels-row { display: flex; gap: 1px; position: absolute; top: 22%; width: 100%; justify-content: center; }
+        .hotel-dot { width: 5px; height: 5px; background: #e11d48; border-radius: 50%; display: none; border: 1px solid white; }
 
-        /* FICHAS */
-        .token {
-            width: 16px; height: 16px; border-radius: 50%;
-            border: 2px solid white; position: absolute;
-            z-index: 100; transition: all 0.3s;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.4);
-        }
+        .token { width: 14px; height: 14px; border-radius: 50%; border: 2px solid white; position: absolute; z-index: 100; transition: all 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28); box-shadow: 0 2px 4px rgba(0,0,0,0.4); }
 
-        /* PANELES LATERALES */
-        .ui-panel {
-            flex: 1;
-            background: white;
-            border-radius: 15px;
-            padding: 15px;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
+        .ui-panel { flex: 1; background: white; border-radius: 15px; padding: 15px; display: flex; flex-direction: column; overflow: hidden; }
+        #log { height: 100px; background: #1e293b; color: #38bdf8; padding: 8px; font-family: monospace; font-size: 10px; overflow-y: auto; border-radius: 8px; margin: 5px 0; }
 
-        #log {
-            height: 120px;
-            background: #1e293b;
-            color: #38bdf8;
-            padding: 10px;
-            font-family: monospace;
-            font-size: 11px;
-            overflow-y: auto;
-            border-radius: 8px;
-            margin: 10px 0;
-        }
-
-        /* PESTAÑAS DE PROPIEDADES */
-        .tabs { display: flex; gap: 5px; margin-bottom: 10px; overflow-x: auto; }
-        .tab { 
-            padding: 5px 10px; border-radius: 5px; background: #eee; 
-            cursor: pointer; font-size: 12px; white-space: nowrap;
-        }
+        .tabs { display: flex; gap: 4px; margin-bottom: 8px; overflow-x: auto; padding-bottom: 4px; }
+        .tab { padding: 6px 12px; border-radius: 6px; background: #f1f5f9; cursor: pointer; font-size: 11px; white-space: nowrap; font-weight: bold; }
         .tab.active { background: var(--primary); color: white; }
 
         #prop-list { flex-grow: 1; overflow-y: auto; }
-        .prop-item { 
-            padding: 8px; border: 1px solid #eee; border-radius: 8px; 
-            margin-bottom: 5px; font-size: 12px;
-        }
+        .prop-item { padding: 8px; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 6px; font-size: 11px; background: #f8fafc; }
+        
+        .btn-main { background: var(--primary); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.2s; }
+        .btn-main:active { transform: scale(0.98); }
+        .btn-hotel { background: #10b981; color: white; border: none; padding: 4px; border-radius: 4px; font-size: 9px; cursor: pointer; width: 100%; margin-top: 4px; }
 
-        .btn-main {
-            background: var(--primary); color: white; border: none;
-            padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer;
-        }
-        .btn-main:disabled { background: #ccc; }
-
-        .center-ui {
-            grid-column: 2/6; grid-row: 2/6;
-            display: flex; flex-direction: column;
-            justify-content: center; align-items: center;
-            background: #f8fafc; border-radius: 10px;
-        }
+        .center-ui { grid-column: 2/6; grid-row: 2/6; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #f8fafc; border-radius: 10px; border: 2px dashed #cbd5e1; }
     </style>
 </head>
 <body>
 
 <div id="setup-menu">
-    <h2>🇦🇷 ArgenPoly</h2>
+    <h2 style="color: var(--primary); margin: 0;">🇦🇷 ARGENPOLY</h2>
+    <p style="font-size: 12px; color: #64748b;">Domina las provincias argentinas</p>
+    
     <div class="input-group">
-        <label>Modo de Juego:</label>
+        <label>Modo de Juego</label>
         <select id="mode-select" onchange="toggleInputs()">
             <option value="bot">Contra el Servidor</option>
-            <option value="multi">Multijugador (Hasta 4)</option>
+            <option value="multi">Multijugador</option>
         </select>
     </div>
-    <div id="player-names">
-        <div class="input-group">
-            <input type="text" id="p1-name" placeholder="Nombre Jugador 1">
-        </div>
-    </div>
+    
     <div id="multi-options" style="display:none">
         <div class="input-group">
-            <label>Cantidad de jugadores:</label>
+            <label>Cantidad de Jugadores</label>
             <select id="player-qty" onchange="generateNameInputs()">
                 <option value="2">2 Jugadores</option>
                 <option value="3">3 Jugadores</option>
@@ -188,28 +70,35 @@
             </select>
         </div>
     </div>
-    <button class="btn-main" onclick="initGame()" style="width:100%">EMPEZAR VIAJE</button>
+
+    <div id="player-names">
+        <div class="input-group">
+            <input type="text" id="p0-name" placeholder="Tu Nombre">
+        </div>
+    </div>
+    
+    <button class="btn-main" onclick="initGame()">COMENZAR PARTIDA</button>
 </div>
 
 <div id="game-container">
-    <div class="ui-panel" id="players-panel">
-        <h3>Viajeros</h3>
+    <div class="ui-panel">
+        <h3 style="margin:0 0 10px 0">Estado del Viaje</h3>
         <div id="players-list"></div>
         <div id="log"></div>
-        <button id="roll-btn" class="btn-main" onclick="playTurn()">LANZAR DADOS</button>
+        <button id="roll-btn" class="btn-main" onclick="playTurn()">🎲 LANZAR DADOS</button>
     </div>
 
     <div id="board-wrapper">
         <div id="board">
             <div class="center-ui">
-                <div id="dice-val" style="font-size:40px">🎲</div>
-                <div id="current-turn-label" style="font-weight:bold; color:var(--primary)"></div>
+                <div id="dice-val" style="font-size:40px; margin-bottom:10px">🎲</div>
+                <div id="current-p-label" style="font-weight:900; color:var(--primary); text-align:center"></div>
             </div>
         </div>
     </div>
 
     <div class="ui-panel">
-        <h3>Propiedades</h3>
+        <h3 style="margin:0 0 10px 0">Títulos de Propiedad</h3>
         <div class="tabs" id="tabs-container"></div>
         <div id="prop-list"></div>
     </div>
@@ -218,31 +107,31 @@
 <script>
     const config = [
         { n: "SALIDA", c: "#64748b", type: "start" },
-        { n: "Ushuaia", c: "#ef4444", pr: 150, r: 40, cid: "red" },
-        { n: "R. Gallegos", c: "#ef4444", pr: 180, r: 50, cid: "red" },
-        { n: "Viedma", c: "#f97316", pr: 220, r: 65, cid: "orange" },
-        { n: "Rawson", c: "#f97316", pr: 250, r: 80, cid: "orange" },
+        { n: "Ushuaia", prov: "T. del Fuego", c: "#ef4444", pr: 150, r: 40, cid: "TDF" },
+        { n: "Río Grande", prov: "T. del Fuego", c: "#ef4444", pr: 180, r: 50, cid: "TDF" },
+        { n: "R. Gallegos", prov: "Santa Cruz", c: "#f97316", pr: 220, r: 65, cid: "SC" },
+        { n: "Calafate", prov: "Santa Cruz", c: "#f97316", pr: 250, r: 80, cid: "SC" },
         { n: "CÁRCEL", c: "#334155", type: "jail" },
-        { n: "Neuquén", c: "#eab308", pr: 300, r: 100, cid: "yellow" },
-        { n: "Mendoza", c: "#eab308", pr: 350, r: 120, cid: "yellow" },
-        { n: "San Juan", c: "#22c55e", pr: 400, r: 150, cid: "green" },
-        { n: "La Rioja", c: "#22c55e", pr: 450, r: 180, cid: "green" },
-        { n: "ARCA", c: "#fff", type: "special" },
-        { n: "Catamarca", c: "#06b6d4", pr: 500, r: 210, cid: "cyan" },
-        { n: "Tucumán", c: "#06b6d4", pr: 550, r: 250, cid: "cyan" },
-        { n: "Salta", c: "#3b82f6", pr: 600, r: 300, cid: "blue" },
-        { n: "Jujuy", c: "#3b82f6", pr: 650, r: 350, cid: "blue" },
-        { n: "PARKING", c: "#1e293b", type: "special" },
-        { n: "Córdoba", c: "#8b5cf6", pr: 750, r: 450, cid: "purple" },
-        { n: "Rosario", c: "#8b5cf6", pr: 800, r: 500, cid: "purple" },
-        { n: "La Plata", c: "#ec4899", pr: 950, r: 650, cid: "pink" },
-        { n: "CABA", c: "#ec4899", pr: 1300, r: 900, cid: "pink" }
+        { n: "Rawson", prov: "Chubut", c: "#eab308", pr: 300, r: 100, cid: "CH" },
+        { n: "P. Madryn", prov: "Chubut", c: "#eab308", pr: 350, r: 120, cid: "CH" },
+        { n: "Viedma", prov: "Río Negro", c: "#22c55e", pr: 400, r: 150, cid: "RN" },
+        { n: "Bariloche", prov: "Río Negro", c: "#22c55e", pr: 450, r: 180, cid: "RN" },
+        { n: "SUERTE", c: "#fff", type: "special" },
+        { n: "Neuquén Cap.", prov: "Neuquén", c: "#06b6d4", pr: 500, r: 210, cid: "NQ" },
+        { n: "S.M. de los Andes", prov: "Neuquén", c: "#06b6d4", pr: 550, r: 250, cid: "NQ" },
+        { n: "Mendoza Cap.", prov: "Mendoza", c: "#3b82f6", pr: 600, r: 300, cid: "MZ" },
+        { n: "San Rafael", prov: "Mendoza", c: "#3b82f6", pr: 650, r: 350, cid: "MZ" },
+        { n: "ARCA", c: "#334155", type: "special" },
+        { n: "Córdoba Cap.", prov: "Córdoba", c: "#8b5cf6", pr: 750, r: 450, cid: "CB" },
+        { n: "Carlos Paz", prov: "Córdoba", c: "#8b5cf6", pr: 800, r: 500, cid: "CB" },
+        { n: "La Plata", prov: "Bs. Aires", c: "#ec4899", pr: 1000, r: 700, cid: "BA" },
+        { n: "Mar del Plata", prov: "Bs. Aires", c: "#ec4899", pr: 1300, r: 900, cid: "BA" }
     ];
 
     let players = [];
     let turn = 0;
     let viewTab = 0;
-    const colors = ["#ef4444", "#3b82f6", "#10b981", "#f59e0b"];
+    const pColors = ["#ef4444", "#3b82f6", "#10b981", "#f59e0b"];
 
     function toggleInputs() {
         const mode = document.getElementById('mode-select').value;
@@ -263,22 +152,14 @@
     function initGame() {
         const mode = document.getElementById('mode-select').value;
         const qty = mode === 'bot' ? 1 : parseInt(document.getElementById('player-qty').value);
-        
         players = [];
         for(let i=0; i<qty; i++) {
-            players.push({
-                id: i,
-                name: document.getElementById(`p${i}-name`).value || `Jugador ${i+1}`,
-                money: 2000, pos: 0, color: colors[i], props: [], hotels: {}, isBot: false
-            });
+            players.push({ id: i, name: document.getElementById(`p${i}-name`).value || `Jugador ${i+1}`, money: 2500, pos: 0, color: pColors[i], props: [], hotels: {}, isBot: false });
         }
-        if(mode === 'bot') {
-            players.push({ id: 1, name: "Servidor", money: 2000, pos: 0, color: colors[1], props: [], hotels: {}, isBot: true });
-        }
-
+        if(mode === 'bot') players.push({ id: 1, name: "Servidor", money: 2500, pos: 0, color: pColors[1], props: [], hotels: {}, isBot: true });
+        
         document.getElementById('setup-menu').style.display = 'none';
         document.getElementById('game-container').style.display = 'flex';
-        
         renderBoard();
         updateUI();
     }
@@ -286,134 +167,98 @@
     function renderBoard() {
         const board = document.getElementById('board');
         const posMap = [[5,5],[4,5],[3,5],[2,5],[1,5],[0,5],[0,4],[0,3],[0,2],[0,1],[0,0],[1,0],[2,0],[3,0],[4,0],[5,0],[5,1],[5,2],[5,3],[5,4]];
-        
         config.forEach((d, i) => {
             const cell = document.createElement('div');
             cell.className = 'cell';
             cell.id = `cell-${i}`;
             cell.style.gridColumn = posMap[i][0] + 1;
             cell.style.gridRow = posMap[i][1] + 1;
-            cell.innerHTML = `
-                ${d.pr ? `<div class="cell-color" style="background:${d.c}"></div>` : ''}
-                <div class="hotels-row" id="hotels-${i}">
-                    <div class="hotel-dot"></div><div class="hotel-dot"></div><div class="hotel-dot"></div><div class="hotel-dot"></div>
-                </div>
-                <div>${d.n}</div>
-                ${d.pr ? `<div style="color:green; font-size:8px">$${d.pr}</div>` : ''}
-            `;
+            cell.innerHTML = `${d.pr ? `<div class="cell-color" style="background:${d.c}"></div>` : ''}<div class="hotels-row" id="h-${i}"><div class="hotel-dot"></div><div class="hotel-dot"></div><div class="hotel-dot"></div><div class="hotel-dot"></div></div><div>${d.n}</div>${d.pr ? `<div style="color:green; font-size:7px">$${d.pr}</div>` : ''}`;
             board.appendChild(cell);
         });
-
         players.forEach(p => {
             const t = document.createElement('div');
-            t.className = 'token';
-            t.id = `token-${p.id}`;
-            t.style.backgroundColor = p.color;
+            t.className = 'token'; t.id = `tk-${p.id}`; t.style.backgroundColor = p.color;
             document.getElementById('board-wrapper').appendChild(t);
         });
-        updateTokenPositions();
+        updateTokenPos();
     }
 
     async function playTurn() {
         const p = players[turn];
-        if(p.isBot && turn !== 1) return; // Seguridad
-
         document.getElementById('roll-btn').disabled = true;
         const roll = Math.floor(Math.random() * 6) + 1;
         document.getElementById('dice-val').innerText = ['⚀','⚁','⚂','⚃','⚄','⚅'][roll-1];
 
         for(let i=0; i<roll; i++) {
             p.pos = (p.pos + 1) % config.length;
-            updateTokenPositions();
-            if(p.pos === 0) { p.money += 200; addLog(`${p.name} cobró $200 de salida`); }
+            updateTokenPos();
+            if(p.pos === 0) { p.money += 200; addLog(`${p.name} pasó por Salida (+$200)`); }
             await new Promise(r => setTimeout(r, 200));
         }
-
         handleLanding(p);
-        nextTurn();
+        turn = (turn + 1) % players.length;
+        updateUI();
+        if(players[turn].isBot) setTimeout(playTurn, 1000);
+        else document.getElementById('roll-btn').disabled = false;
     }
 
     function handleLanding(p) {
         const tile = config[p.pos];
         if(!tile.pr) return;
-
         const owner = players.find(x => x.props.includes(tile.n));
         if(owner && owner !== p) {
-            const hCount = owner.hotels[tile.n] || 0;
-            const rent = tile.r * (1 + hCount);
-            p.money -= rent;
-            owner.money += rent;
+            const rent = tile.r * (1 + (owner.hotels[tile.n] || 0));
+            p.money -= rent; owner.money += rent;
             addLog(`${p.name} pagó $${rent} a ${owner.name}`);
         } else if(!owner && p.money >= tile.pr) {
-            if(!p.isBot || (p.isBot && p.money > 800)) {
-                p.money -= tile.pr;
-                p.props.push(tile.n);
-                addLog(`${p.name} compró ${tile.n}`);
+            if(!p.isBot || p.money > 1000) {
+                p.money -= tile.pr; p.props.push(tile.n);
+                addLog(`${p.name} compró ${tile.n} (${tile.prov})`);
             }
         }
     }
 
-    function buyHotel(pId, propName) {
-        const p = players[pId];
+    function buildHotel(propName) {
+        const p = players[turn === 0 ? 0 : turn-1]; // Fix para el humano
         const tile = config.find(c => c.n === propName);
-        const cost = Math.floor(tile.pr * 0.8);
-        const currentHotels = p.hotels[propName] || 0;
-
-        if(p.money >= cost && currentHotels < 4) {
+        const cost = Math.floor(tile.pr * 0.7);
+        const current = p.hotels[propName] || 0;
+        
+        if(p.money >= cost && current < 4) {
             p.money -= cost;
-            p.hotels[propName] = currentHotels + 1;
-            addLog(`${p.name} construyó un hotel en ${propName}`);
-            updateBoardHotels(config.indexOf(tile), p.hotels[propName]);
+            p.hotels[propName] = current + 1;
+            addLog(`🏨 Hotel en ${propName} (Total: ${p.hotels[propName]})`);
+            const dots = document.querySelectorAll(`#h-${config.indexOf(tile)} .hotel-dot`);
+            dots[current].style.display = 'block';
             updateUI();
         }
     }
 
-    function updateBoardHotels(cellIdx, count) {
-        const dots = document.querySelectorAll(`#hotels-${cellIdx} .hotel-dot`);
-        dots.forEach((d, i) => {
-            d.parentElement.parentElement.classList.add('has-hotel');
-            d.style.display = i < count ? 'block' : 'none';
-        });
+    function checkMonopoly(player, cid) {
+        const provinceTiles = config.filter(c => c.cid === cid).map(c => c.n);
+        return provinceTiles.every(name => player.props.includes(name));
     }
 
-    function nextTurn() {
-        turn = (turn + 1) % players.length;
-        updateUI();
-        if(players[turn].isBot) {
-            setTimeout(playTurn, 1000);
-        } else {
-            document.getElementById('roll-btn').disabled = false;
-        }
-    }
-
-    function updateTokenPositions() {
+    function updateTokenPos() {
         players.forEach((p, i) => {
-            const t = document.getElementById(`token-${p.id}`);
+            const t = document.getElementById(`tk-${p.id}`);
             const cell = document.getElementById(`cell-${p.pos}`);
             const bRect = document.getElementById('board').getBoundingClientRect();
             const cRect = cell.getBoundingClientRect();
-            
-            const offsetX = (i % 2) * 15;
-            const offsetY = Math.floor(i / 2) * 15;
-
-            t.style.left = (cRect.left - bRect.left + 5 + offsetX) + 'px';
-            t.style.top = (cRect.top - bRect.top + 5 + offsetY) + 'px';
+            t.style.left = (cRect.left - bRect.left + 5 + (i*8)) + 'px';
+            t.style.top = (cRect.top - bRect.top + 5) + 'px';
         });
     }
 
     function updateUI() {
-        // Jugadores
         const pList = document.getElementById('players-list');
         pList.innerHTML = '';
         players.forEach((p, i) => {
-            pList.innerHTML += `
-                <div style="border-left: 5px solid ${p.color}; padding:5px; margin-bottom:5px; background:${turn===i?'#e0f2fe':'#f1f5f9'}">
-                    <b>${p.name}</b>: $${p.money}
-                </div>`;
+            pList.innerHTML += `<div style="border-left:5px solid ${p.color}; padding:5px; margin-bottom:5px; background:${turn===i?'#e0f2fe':'#f1f5f9'}; font-size:12px"><b>${p.name}</b>: $${p.money}</div>`;
         });
-        document.getElementById('current-turn-label').innerText = "Turno de: " + players[turn].name;
+        document.getElementById('current-p-label').innerText = "TURNO DE: " + players[turn].name;
 
-        // Pestañas
         const tCont = document.getElementById('tabs-container');
         tCont.innerHTML = '';
         players.forEach((p, i) => {
@@ -424,30 +269,26 @@
             tCont.appendChild(tab);
         });
 
-        // Propiedades del jugador seleccionado
         const propList = document.getElementById('prop-list');
         propList.innerHTML = '';
         const viewer = players[viewTab];
         viewer.props.forEach(pName => {
             const tile = config.find(c => c.n === pName);
             const hCount = viewer.hotels[pName] || 0;
-            const hotelCost = Math.floor(tile.pr * 0.8);
-            const canBuild = (viewer.id === turn && !viewer.isBot && hCount < 4 && viewer.money >= hotelCost);
-
+            const hasMonopoly = checkMonopoly(viewer, tile.cid);
             propList.innerHTML += `
-                <div class="prop-item" style="border-top: 4px solid ${tile.c}">
-                    <b>${pName}</b> (Hoteles: ${hCount})<br>
-                    Renta actual: $${tile.r * (1+hCount)}<br>
-                    ${canBuild ? `<button onclick="buyHotel(${viewer.id}, '${pName}')" style="font-size:10px; padding:2px 5px">Construir Hotel ($${hotelCost})</button>` : ''}
+                <div class="prop-item" style="border-top:4px solid ${tile.c}">
+                    <b>${pName}</b> <small>(${tile.prov})</small><br>
+                    Renta: $${tile.r * (1+hCount)} | Hoteles: ${hCount}/4<br>
+                    ${hasMonopoly && hCount < 4 && viewer.id === 0 && turn === 0 ? `<button class="btn-hotel" onclick="buildHotel('${pName}')">Mejorar ($${Math.floor(tile.pr*0.7)})</button>` : (hasMonopoly ? '✨ Provincia Completa' : 'Faltan ciudades')}
                 </div>`;
         });
     }
 
     function addLog(msg) {
         const l = document.getElementById('log');
-        l.innerHTML = `<div>> ${msg}</div>` + l.innerHTML;
+        l.innerHTML = `<div>• ${msg}</div>` + l.innerHTML;
     }
-
     generateNameInputs();
 </script>
 </body>
