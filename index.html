@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ArgenPoly - Pro Edition</title>
+    <title>ArgenPoly - Federal Edition</title>
     <style>
         :root { --bg: #0f172a; --panel: #ffffff; --primary: #0081C9; --accent: #f59e0b; --danger: #ef4444; }
         * { box-sizing: border-box; }
@@ -36,18 +36,35 @@
         .tab { padding: 6px 12px; border-radius: 6px; background: #f1f5f9; cursor: pointer; font-size: 11px; white-space: nowrap; font-weight: bold; }
         .tab.active { background: var(--primary); color: white; }
 
-        #prop-list { flex-grow: 1; overflow-y: auto; }
-        .prop-item { padding: 8px; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 6px; font-size: 11px; background: #f8fafc; }
+        #prop-list { flex-grow: 1; overflow-y: auto; padding-right: 5px; }
         
+        /* TARJETAS DE PROPIEDAD */
+        .prop-item { 
+            padding: 8px; border: 1px solid #e2e8f0; border-radius: 8px; 
+            margin-bottom: 6px; font-size: 11px; background: #f8fafc;
+            cursor: pointer; transition: all 0.2s; position: relative;
+        }
+        .prop-item:hover { border-color: var(--primary); }
+        .prop-item.selected { 
+            border: 2px solid var(--primary); 
+            background: #ffffff;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .rent-details {
+            background: #f1f5f9; color: #475569;
+            padding: 8px; border-radius: 6px; margin-top: 8px;
+            font-size: 10px; line-height: 1.4;
+        }
+
         .btn-main { background: var(--primary); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.2s; }
         .btn-main:disabled { background: #94a3b8; cursor: not-allowed; opacity: 0.7; }
         
-        .btn-hotel { background: #10b981; color: white; border: none; padding: 4px; border-radius: 4px; font-size: 9px; cursor: pointer; width: 100%; margin-top: 4px; }
-        .btn-sell { background: var(--danger); color: white; border: none; padding: 4px; border-radius: 4px; font-size: 9px; cursor: pointer; width: 100%; margin-top: 2px; }
+        .btn-hotel { background: #10b981; color: white; border: none; padding: 6px; border-radius: 4px; font-size: 10px; cursor: pointer; width: 100%; margin-top: 8px; font-weight: bold; }
+        .btn-sell { background: var(--danger); color: white; border: none; padding: 6px; border-radius: 4px; font-size: 10px; cursor: pointer; width: 100%; margin-top: 8px; font-weight: bold; }
 
         .center-ui { grid-column: 2/6; grid-row: 2/6; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #f8fafc; border-radius: 10px; border: 2px dashed #cbd5e1; }
         
-        /* ANIMACION DADO */
         #dice-val { transition: transform 0.4s; }
         .rolling { animation: rotateDice 0.4s infinite; }
         @keyframes rotateDice {
@@ -64,7 +81,7 @@
 
 <div id="setup-menu">
     <h2 style="color: var(--primary); margin: 0;">🇦🇷 ARGENPOLY</h2>
-    <p style="font-size: 12px; color: #64748b;">Mantené tu cuenta en positivo para seguir viajando</p>
+    <p style="font-size: 12px; color: #64748b;">Gestión Federal de Propiedades</p>
     
     <div class="input-group">
         <label>Modo de Juego</label>
@@ -121,7 +138,7 @@
     </div>
 
     <div class="ui-panel">
-        <h3 style="margin:0 0 10px 0">Propiedades</h3>
+        <h3 style="margin:0 0 10px 0">Cartera de Bienes</h3>
         <div class="tabs" id="tabs-container"></div>
         <div id="prop-list"></div>
     </div>
@@ -154,6 +171,7 @@
     let players = [];
     let turn = 0;
     let viewTab = 0;
+    let selectedPropName = null;
     let gameSpeed = 400;
     const pColors = ["#ef4444", "#3b82f6", "#10b981", "#f59e0b"];
 
@@ -236,7 +254,7 @@
         if(p.money >= 0) {
             setTimeout(nextTurn, gameSpeed);
         } else {
-            addLog(`⚠️ ${p.name} está en BANCARROTA. Debe vender propiedades.`);
+            addLog(`⚠️ ${p.name} en BANCARROTA. Debe vender bienes.`);
             if(p.isBot) botResolveDebt(p);
         }
     }
@@ -249,7 +267,7 @@
         if(owner && owner !== p && !owner.isOut) {
             const rent = tile.r * (1 + (owner.hotels[tile.n] || 0));
             p.money -= rent; owner.money += rent;
-            addLog(`${p.name} pagó $${rent} de renta a ${owner.name}`);
+            addLog(`${p.name} pagó $${rent} a ${owner.name}`);
         } else if(!owner && p.money >= tile.pr) {
             if(!p.isBot || p.money > 800) {
                 p.money -= tile.pr; p.props.push(tile.n);
@@ -259,27 +277,24 @@
     }
 
     function sellProp(pId, propName) {
-        if(!confirm(`¿Deseas vender ${propName} por el 50% de su valor?`)) return;
+        if(!confirm(`¿Deseas vender ${propName} por $${Math.floor(config.find(c=>c.n===propName).pr/2)}?`)) return;
         
         const p = players[pId];
         const tile = config.find(c => c.n === propName);
-        const sellValue = Math.floor(tile.pr / 2);
-        
-        p.money += sellValue;
+        p.money += Math.floor(tile.pr / 2);
         p.props = p.props.filter(n => n !== propName);
         delete p.hotels[propName];
         
-        // Limpiar visual
         const idx = config.indexOf(tile);
         const dots = document.querySelectorAll(`#h-${idx} .hotel-dot`);
         dots.forEach(d => d.style.display = 'none');
 
-        addLog(`💰 ${p.name} vendió ${propName} por $${sellValue}`);
+        addLog(`💰 ${p.name} vendió ${propName}`);
+        selectedPropName = null;
         updateUI();
 
-        // Si el jugador actual saldó su deuda, habilitar continuación
         if(p.money >= 0 && turn === pId) {
-            addLog(`✅ Deuda saldada. Turno finalizado.`);
+            addLog(`✅ Deuda saldada.`);
             setTimeout(nextTurn, 1000);
         }
     }
@@ -291,7 +306,6 @@
             p.money += Math.floor(tile.pr / 2);
             p.props.shift();
             delete p.hotels[prop];
-            addLog(`🤖 Servidor vendió ${prop} para pagar deuda.`);
         }
         if(p.money < 0) eliminarJugador(p);
         else nextTurn();
@@ -301,11 +315,11 @@
         p.isOut = true;
         p.money = -999999;
         document.getElementById(`tk-${p.id}`).style.display = 'none';
-        addLog(`❌ ${p.name} ha sido ELIMINADO del juego.`);
+        addLog(`❌ ${p.name} ELIMINADO.`);
         
         const activos = players.filter(pl => !pl.isOut);
         if(activos.length === 1) {
-            alert(`¡JUEGO TERMINADO! EL GANADOR ES ${activos[0].name.toUpperCase()}`);
+            alert(`¡GANADOR: ${activos[0].name.toUpperCase()}!`);
             location.reload();
         }
         nextTurn();
@@ -314,7 +328,6 @@
     function nextTurn() {
         turn = (turn + 1) % players.length;
         if(players[turn].isOut) return nextTurn();
-        
         updateUI();
         if(players[turn].isBot) setTimeout(playTurn, gameSpeed * 2);
     }
@@ -333,11 +346,6 @@
         }
     }
 
-    function checkMonopoly(player, cid) {
-        const provinceTiles = config.filter(c => c.cid === cid).map(c => c.n);
-        return provinceTiles.every(name => player.props.includes(name));
-    }
-
     function updateTokenPos() {
         players.forEach((p, i) => {
             const t = document.getElementById(`tk-${p.id}`);
@@ -353,8 +361,7 @@
         const pList = document.getElementById('players-list');
         pList.innerHTML = '';
         players.forEach((p, i) => {
-            const isTurn = turn === i;
-            pList.innerHTML += `<div class="${p.isOut?'player-out':''} " style="border-left:5px solid ${p.color}; padding:8px; margin-bottom:5px; background:${isTurn?'#e0f2fe':'#f1f5f9'}; font-size:12px">
+            pList.innerHTML += `<div class="${p.isOut?'player-out':''} " style="border-left:5px solid ${p.color}; padding:8px; margin-bottom:5px; background:${turn===i?'#e0f2fe':'#f1f5f9'}; font-size:12px">
                 <b>${p.name}</b>: <span style="color:${p.money<0?'red':'black'}">$${p.money}</span>
             </div>`;
         });
@@ -362,43 +369,77 @@
         const activeP = players[turn];
         document.getElementById('current-p-label').innerText = "TURNO DE: " + activeP.name;
 
-        // Manejo del botón de dados y alertas de deuda
         const btnContainer = document.getElementById('turn-action-container');
         if(activeP.money < 0 && !activeP.isBot) {
-            btnContainer.innerHTML = `<div class="alert-deuda">ESTÁS EN DEUDA ($${activeP.money})<br>Vende propiedades para continuar o perderás.</div>`;
-            if(activeP.props.length === 0) {
-                btnContainer.innerHTML += `<button class="btn-main" style="background:black" onclick="eliminarJugador(players[turn])">DECLARAR BANCARROTA</button>`;
-            }
+            btnContainer.innerHTML = `<div class="alert-deuda">DEUDA DE $${Math.abs(activeP.money)}<br>Vendé propiedades para seguir.</div>`;
+            if(activeP.props.length === 0) btnContainer.innerHTML += `<button class="btn-main" style="background:black" onclick="eliminarJugador(players[turn])">BANCARROTA</button>`;
         } else {
             btnContainer.innerHTML = `<button id="roll-btn" class="btn-main" onclick="playTurn()" ${activeP.isBot?'disabled':''}>🎲 LANZAR DADOS</button>`;
         }
 
-        // Pestañas
         const tCont = document.getElementById('tabs-container');
         tCont.innerHTML = '';
         players.forEach((p, i) => {
             const tab = document.createElement('div');
             tab.className = `tab ${viewTab === i ? 'active' : ''}`;
             tab.innerText = p.name;
-            tab.onclick = () => { viewTab = i; updateUI(); };
+            tab.onclick = () => { viewTab = i; selectedPropName = null; updateUI(); };
             tCont.appendChild(tab);
         });
 
-        // Propiedades
+        renderPropertyList();
+    }
+
+    function renderPropertyList() {
         const propList = document.getElementById('prop-list');
         propList.innerHTML = '';
         const viewer = players[viewTab];
-        viewer.props.forEach(pName => {
+
+        // ORDENAR PROPIEDADES SEGUN TABLERO
+        const orderedProps = config
+            .filter(tile => viewer.props.includes(tile.n))
+            .map(tile => tile.n);
+
+        orderedProps.forEach(pName => {
             const tile = config.find(c => c.n === pName);
             const hCount = viewer.hotels[pName] || 0;
-            const hasMonopoly = checkMonopoly(viewer, tile.cid);
-            propList.innerHTML += `
-                <div class="prop-item" style="border-top:4px solid ${tile.c}">
-                    <b>${pName}</b> <small>(${tile.prov})</small><br>
-                    Renta: $${tile.r * (1+hCount)}<br>
-                    ${hasMonopoly && hCount < 4 && viewer.id === turn && !viewer.isBot ? `<button class="btn-hotel" onclick="buildHotel('${pName}')">Poner Hotel ($${Math.floor(tile.pr*0.7)})</button>` : ''}
-                    ${viewer.id === turn && !viewer.isBot ? `<button class="btn-sell" onclick="sellProp(${viewer.id}, '${pName}')">Vender por $${Math.floor(tile.pr/2)}</button>` : ''}
-                </div>`;
+            const isSelected = selectedPropName === pName;
+            
+            const div = document.createElement('div');
+            div.className = `prop-item ${isSelected ? 'selected' : ''}`;
+            div.style.borderTop = `4px solid ${tile.c}`;
+            div.onclick = () => { 
+                selectedPropName = isSelected ? null : pName; 
+                updateUI(); 
+            };
+
+            let content = `<b>${pName}</b> <small>(${tile.prov})</small><br>
+                           Renta actual: $${tile.r * (1 + hCount)}`;
+
+            if(isSelected) {
+                const provTiles = config.filter(c => c.cid === tile.cid).map(c => c.n);
+                const hasMonopoly = provTiles.every(name => viewer.props.includes(name));
+                const sellPrice = Math.floor(tile.pr / 2);
+
+                content += `<div class="rent-details">
+                                • Base: $${tile.r}<br>
+                                • 1 Hotel: $${tile.r * 2}<br>
+                                • 2 Hoteles: $${tile.r * 3}<br>
+                                • 3 Hoteles: $${tile.r * 4}<br>
+                                • 4 Hoteles: $${tile.r * 5}
+                            </div>`;
+                
+                if(hasMonopoly && hCount < 4 && viewer.id === turn && !viewer.isBot) {
+                    content += `<button class="btn-hotel" onclick="event.stopPropagation(); buildHotel('${pName}')">CONSTRUIR HOTEL ($${Math.floor(tile.pr*0.7)})</button>`;
+                }
+                
+                if(viewer.id === turn && !viewer.isBot) {
+                    content += `<button class="btn-sell" onclick="event.stopPropagation(); sellProp(${viewer.id}, '${pName}')">VENDER POR $${sellPrice}</button>`;
+                }
+            }
+
+            div.innerHTML = content;
+            propList.appendChild(div);
         });
     }
 
