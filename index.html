@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ArgenPoly - Federal Edition</title>
     <style>
-        :root { --bg: #0f172a; --panel: #ffffff; --primary: #0081C9; --accent: #f59e0b; --danger: #ef4444; }
+        :root { --bg: #0f172a; --panel: #ffffff; --primary: #0081C9; --accent: #f59e0b; --danger: #ef4444; --success: #22c55e; }
         * { box-sizing: border-box; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; color: #1e293b; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow: hidden; }
 
@@ -27,41 +27,32 @@
         .hotels-row { display: flex; gap: 1px; position: absolute; top: 22%; width: 100%; justify-content: center; }
         .hotel-dot { width: 5px; height: 5px; background: #e11d48; border-radius: 50%; display: none; border: 1px solid white; }
 
-        .token { width: 16px; height: 16px; border-radius: 50%; border: 2px solid white; position: absolute; z-index: 100; transition: all 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28); box-shadow: 0 2px 4px rgba(0,0,0,0.4); }
+        .token { width: 18px; height: 18px; border-radius: 50%; border: 3px solid white; position: absolute; z-index: 100; transition: all 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28); box-shadow: 0 3px 6px rgba(0,0,0,0.4); }
 
         .ui-panel { flex: 1; background: white; border-radius: 15px; padding: 15px; display: flex; flex-direction: column; overflow: hidden; }
         #log { height: 110px; background: #1e293b; color: #38bdf8; padding: 8px; font-family: monospace; font-size: 10px; overflow-y: auto; border-radius: 8px; margin: 5px 0; border: 2px solid #334155; }
 
         .tabs { display: flex; gap: 4px; margin-bottom: 8px; overflow-x: auto; padding-bottom: 4px; }
-        .tab { padding: 6px 12px; border-radius: 6px; background: #f1f5f9; cursor: pointer; font-size: 11px; white-space: nowrap; font-weight: bold; }
-        .tab.active { background: var(--primary); color: white; }
+        .tab { padding: 6px 12px; border-radius: 6px; background: #f1f5f9; cursor: pointer; font-size: 11px; white-space: nowrap; font-weight: bold; transition: 0.2s; }
+        .tab.active { background: var(--primary); color: white; transform: scale(1.05); }
 
         #prop-list { flex-grow: 1; overflow-y: auto; padding-right: 5px; }
         
-        /* TARJETAS DE PROPIEDAD */
-        .prop-item { 
-            padding: 8px; border: 1px solid #e2e8f0; border-radius: 8px; 
-            margin-bottom: 6px; font-size: 11px; background: #f8fafc;
-            cursor: pointer; transition: all 0.2s; position: relative;
-        }
-        .prop-item:hover { border-color: var(--primary); }
-        .prop-item.selected { 
-            border: 2px solid var(--primary); 
-            background: #ffffff;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
+        /* TARJETAS */
+        .prop-item { padding: 8px; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 6px; font-size: 11px; background: #f8fafc; cursor: pointer; transition: all 0.2s; }
+        .prop-item.selected { border: 2px solid var(--primary); background: #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .rent-details { background: #f1f5f9; color: #475569; padding: 8px; border-radius: 6px; margin-top: 8px; font-size: 10px; }
 
-        .rent-details {
-            background: #f1f5f9; color: #475569;
-            padding: 8px; border-radius: 6px; margin-top: 8px;
-            font-size: 10px; line-height: 1.4;
-        }
-
-        .btn-main { background: var(--primary); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.2s; }
-        .btn-main:disabled { background: #94a3b8; cursor: not-allowed; opacity: 0.7; }
-        
-        .btn-hotel { background: #10b981; color: white; border: none; padding: 6px; border-radius: 4px; font-size: 10px; cursor: pointer; width: 100%; margin-top: 8px; font-weight: bold; }
+        /* BOTONES */
+        .btn-main { background: var(--primary); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.2s; margin-bottom: 8px; }
+        .btn-buy { background: var(--success); display: none; }
+        .btn-end { background: #64748b; display: none; }
+        .btn-main:disabled { background: #94a3b8 !important; cursor: not-allowed; opacity: 0.6; }
+        .btn-hotel { background: var(--success); color: white; border: none; padding: 6px; border-radius: 4px; font-size: 10px; cursor: pointer; width: 100%; margin-top: 8px; font-weight: bold; }
         .btn-sell { background: var(--danger); color: white; border: none; padding: 6px; border-radius: 4px; font-size: 10px; cursor: pointer; width: 100%; margin-top: 8px; font-weight: bold; }
+
+        .player-status-card { padding: 12px; border-radius: 10px; margin-bottom: 8px; transition: 0.3s; border-left: 15px solid transparent; position: relative; }
+        .active-turn-indicator { border-left-width: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); transform: translateX(5px); font-weight: 900; }
 
         .center-ui { grid-column: 2/6; grid-row: 2/6; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #f8fafc; border-radius: 10px; border: 2px dashed #cbd5e1; }
         
@@ -74,14 +65,13 @@
         }
 
         .alert-deuda { background: #fee2e2; border: 2px solid var(--danger); color: var(--danger); padding: 10px; border-radius: 8px; font-weight: bold; font-size: 12px; margin-bottom: 10px; text-align: center; }
-        .player-out { opacity: 0.5; text-decoration: line-through; filter: grayscale(1); }
     </style>
 </head>
 <body>
 
 <div id="setup-menu">
     <h2 style="color: var(--primary); margin: 0;">🇦🇷 ARGENPOLY</h2>
-    <p style="font-size: 12px; color: #64748b;">Gestión Federal de Propiedades</p>
+    <p style="font-size: 12px; color: #64748b;">Elegí bien qué comprar para ganar</p>
     
     <div class="input-group">
         <label>Modo de Juego</label>
@@ -92,23 +82,12 @@
     </div>
     
     <div class="input-group">
-        <label>Velocidad de Juego</label>
+        <label>Velocidad</label>
         <select id="speed-select">
             <option value="400">Normal (x1)</option>
             <option value="250">Rápido (x1.5)</option>
             <option value="150">Turbo (x2)</option>
         </select>
-    </div>
-
-    <div id="multi-options" style="display:none">
-        <div class="input-group">
-            <label>Cantidad de Jugadores</label>
-            <select id="player-qty" onchange="generateNameInputs()">
-                <option value="2">2 Jugadores</option>
-                <option value="3">3 Jugadores</option>
-                <option value="4">4 Jugadores</option>
-            </select>
-        </div>
     </div>
 
     <div id="player-names">
@@ -120,11 +99,13 @@
 
 <div id="game-container">
     <div class="ui-panel">
-        <h3 style="margin:0 0 10px 0">Jugadores</h3>
+        <h3 style="margin:0 0 10px 0">Estado Federal</h3>
         <div id="players-list"></div>
         <div id="log"></div>
-        <div id="turn-action-container">
+        <div id="controls">
             <button id="roll-btn" class="btn-main" onclick="playTurn()">🎲 LANZAR DADOS</button>
+            <button id="buy-btn" class="btn-main btn-buy" onclick="buyCurrentTile()">💰 COMPRAR PROPIEDAD</button>
+            <button id="end-btn" class="btn-main btn-end" onclick="finishTurn()">⏭ FINALIZAR TURNO</button>
         </div>
     </div>
 
@@ -138,7 +119,7 @@
     </div>
 
     <div class="ui-panel">
-        <h3 style="margin:0 0 10px 0">Cartera de Bienes</h3>
+        <h3 style="margin:0 0 10px 0">Propiedades</h3>
         <div class="tabs" id="tabs-container"></div>
         <div id="prop-list"></div>
     </div>
@@ -175,33 +156,22 @@
     let gameSpeed = 400;
     const pColors = ["#ef4444", "#3b82f6", "#10b981", "#f59e0b"];
 
-    function toggleInputs() {
-        const mode = document.getElementById('mode-select').value;
-        document.getElementById('multi-options').style.display = mode === 'bot' ? 'none' : 'block';
-        generateNameInputs();
-    }
+    function toggleInputs() { generateNameInputs(); }
 
     function generateNameInputs() {
         const mode = document.getElementById('mode-select').value;
-        const qty = mode === 'bot' ? 1 : parseInt(document.getElementById('player-qty').value);
         const container = document.getElementById('player-names');
-        container.innerHTML = '';
-        for(let i=0; i<qty; i++) {
-            container.innerHTML += `<div class="input-group"><input type="text" id="p${i}-name" placeholder="Nombre Jugador ${i+1}"></div>`;
-        }
+        container.innerHTML = '<div class="input-group"><input type="text" id="p0-name" placeholder="Tu Nombre"></div>';
+        if(mode === 'multi') container.innerHTML += '<div class="input-group"><input type="text" id="p1-name" placeholder="Jugador 2"></div>';
     }
 
     function initGame() {
         const mode = document.getElementById('mode-select').value;
-        const qty = mode === 'bot' ? 1 : parseInt(document.getElementById('player-qty').value);
         gameSpeed = parseInt(document.getElementById('speed-select').value);
-        
-        players = [];
-        for(let i=0; i<qty; i++) {
-            players.push({ id: i, name: document.getElementById(`p${i}-name`).value || `Jugador ${i+1}`, money: 2000, pos: 0, color: pColors[i], props: [], hotels: {}, isBot: false, isOut: false });
-        }
-        if(mode === 'bot') players.push({ id: players.length, name: "Servidor", money: 2000, pos: 0, color: pColors[players.length], props: [], hotels: {}, isBot: true, isOut: false });
-        
+        players = [{ id: 0, name: document.getElementById('p0-name').value || "Jugador 1", money: 2000, pos: 0, color: pColors[0], props: [], hotels: {}, isBot: false, isOut: false }];
+        if(mode === 'bot') players.push({ id: 1, name: "Servidor", money: 2000, pos: 0, color: pColors[1], props: [], hotels: {}, isBot: true, isOut: false });
+        else players.push({ id: 1, name: document.getElementById('p1-name').value || "Jugador 2", money: 2000, pos: 0, color: pColors[1], props: [], hotels: {}, isBot: false, isOut: false });
+
         document.getElementById('setup-menu').style.display = 'none';
         document.getElementById('game-container').style.display = 'flex';
         renderBoard();
@@ -217,7 +187,7 @@
             cell.id = `cell-${i}`;
             cell.style.gridColumn = posMap[i][0] + 1;
             cell.style.gridRow = posMap[i][1] + 1;
-            cell.innerHTML = `${d.pr ? `<div class="cell-color" style="background:${d.c}"></div>` : ''}<div class="hotels-row" id="h-${i}"><div class="hotel-dot"></div><div class="hotel-dot"></div><div class="hotel-dot"></div><div class="hotel-dot"></div></div><div>${d.n}</div>${d.pr ? `<div style="color:green; font-size:7px">$${d.pr}</div>` : ''}`;
+            cell.innerHTML = `${d.pr ? `<div class="cell-color" style="background:${d.c}"></div>` : ''}<div class="hotels-row" id="h-${i}"><div class="hotel-dot"></div><div class="hotel-dot"></div><div class="hotel-dot"></div><div class="hotel-dot"></div></div><div>${d.n}</div>${d.pr ? `<div style="color:green; font-size:7px" id="price-${i}">$${d.pr}</div>` : ''}`;
             board.appendChild(cell);
         });
         players.forEach(p => {
@@ -232,9 +202,13 @@
         const p = players[turn];
         if(p.isOut || p.money < 0) return;
 
+        // Auto-seleccionar pestaña del jugador actual
+        viewTab = turn;
+        selectedPropName = null;
+
+        document.getElementById('roll-btn').disabled = true;
         const diceEl = document.getElementById('dice-val');
         diceEl.classList.add('rolling');
-        document.getElementById('roll-btn').disabled = true;
 
         await new Promise(r => setTimeout(r, 600));
         const roll = Math.floor(Math.random() * 6) + 1;
@@ -248,133 +222,100 @@
             await new Promise(r => setTimeout(r, gameSpeed / 2));
         }
         
-        handleLanding(p);
-        updateUI();
-
-        if(p.money >= 0) {
-            setTimeout(nextTurn, gameSpeed);
-        } else {
-            addLog(`⚠️ ${p.name} en BANCARROTA. Debe vender bienes.`);
-            if(p.isBot) botResolveDebt(p);
-        }
+        checkLanding();
     }
 
-    function handleLanding(p) {
+    function checkLanding() {
+        const p = players[turn];
         const tile = config[p.pos];
-        if(!tile.pr) return;
         const owner = players.find(x => x.props.includes(tile.n));
         
         if(owner && owner !== p && !owner.isOut) {
             const rent = tile.r * (1 + (owner.hotels[tile.n] || 0));
             p.money -= rent; owner.money += rent;
             addLog(`${p.name} pagó $${rent} a ${owner.name}`);
-        } else if(!owner && p.money >= tile.pr) {
-            if(!p.isBot || p.money > 800) {
-                p.money -= tile.pr; p.props.push(tile.n);
-                addLog(`${p.name} compró ${tile.n}`);
+            updateUI();
+            if(p.money < 0) {
+                if(p.isBot) botResolveDebt(p);
+                return;
             }
+        } else if(!owner && tile.pr) {
+            if(p.isBot) {
+                if(p.money > tile.pr + 400) buyCurrentTile();
+            } else {
+                document.getElementById('buy-btn').style.display = 'block';
+                document.getElementById('buy-btn').innerText = `💰 COMPRAR ${tile.n.toUpperCase()} ($${tile.pr})`;
+            }
+        }
+
+        if(!p.isBot) document.getElementById('end-btn').style.display = 'block';
+        else setTimeout(finishTurn, gameSpeed * 2);
+        updateUI();
+    }
+
+    function buyCurrentTile() {
+        const p = players[turn];
+        const tile = config[p.pos];
+        if(p.money >= tile.pr) {
+            p.money -= tile.pr;
+            p.props.push(tile.n);
+            addLog(`${p.name} compró ${tile.n}`);
+            document.getElementById('buy-btn').style.display = 'none';
+            document.getElementById(`price-${p.pos}`).innerHTML = `<span style="color:${p.color}">● ${p.name}</span>`;
+            updateUI();
+        } else {
+            alert("No tienes suficiente dinero");
         }
     }
 
-    function sellProp(pId, propName) {
-        if(!confirm(`¿Deseas vender ${propName} por $${Math.floor(config.find(c=>c.n===propName).pr/2)}?`)) return;
+    function finishTurn() {
+        document.getElementById('buy-btn').style.display = 'none';
+        document.getElementById('end-btn').style.display = 'none';
+        document.getElementById('roll-btn').disabled = false;
         
+        turn = (turn + 1) % players.length;
+        if(players[turn].isOut) return finishTurn();
+        
+        updateUI();
+        if(players[turn].isBot) setTimeout(playTurn, gameSpeed);
+    }
+
+    function sellProp(pId, propName) {
+        if(!confirm(`¿Vender ${propName}?`)) return;
         const p = players[pId];
         const tile = config.find(c => c.n === propName);
         p.money += Math.floor(tile.pr / 2);
         p.props = p.props.filter(n => n !== propName);
         delete p.hotels[propName];
-        
-        const idx = config.indexOf(tile);
-        const dots = document.querySelectorAll(`#h-${idx} .hotel-dot`);
-        dots.forEach(d => d.style.display = 'none');
-
-        addLog(`💰 ${p.name} vendió ${propName}`);
+        document.getElementById(`price-${config.indexOf(tile)}`).innerHTML = `<span style="color:green">$${tile.pr}</span>`;
+        addLog(`${p.name} vendió ${propName}`);
         selectedPropName = null;
         updateUI();
-
-        if(p.money >= 0 && turn === pId) {
-            addLog(`✅ Deuda saldada.`);
-            setTimeout(nextTurn, 1000);
-        }
-    }
-
-    function botResolveDebt(p) {
-        while(p.money < 0 && p.props.length > 0) {
-            const prop = p.props[0];
-            const tile = config.find(c => c.n === prop);
-            p.money += Math.floor(tile.pr / 2);
-            p.props.shift();
-            delete p.hotels[prop];
-        }
-        if(p.money < 0) eliminarJugador(p);
-        else nextTurn();
-    }
-
-    function eliminarJugador(p) {
-        p.isOut = true;
-        p.money = -999999;
-        document.getElementById(`tk-${p.id}`).style.display = 'none';
-        addLog(`❌ ${p.name} ELIMINADO.`);
-        
-        const activos = players.filter(pl => !pl.isOut);
-        if(activos.length === 1) {
-            alert(`¡GANADOR: ${activos[0].name.toUpperCase()}!`);
-            location.reload();
-        }
-        nextTurn();
-    }
-
-    function nextTurn() {
-        turn = (turn + 1) % players.length;
-        if(players[turn].isOut) return nextTurn();
-        updateUI();
-        if(players[turn].isBot) setTimeout(playTurn, gameSpeed * 2);
-    }
-
-    function buildHotel(propName) {
-        const p = players[turn];
-        const tile = config.find(c => c.n === propName);
-        const cost = Math.floor(tile.pr * 0.7);
-        const current = p.hotels[propName] || 0;
-        if(p.money >= cost && current < 4) {
-            p.money -= cost;
-            p.hotels[propName] = current + 1;
-            const dots = document.querySelectorAll(`#h-${config.indexOf(tile)} .hotel-dot`);
-            dots[current].style.display = 'block';
-            updateUI();
-        }
-    }
-
-    function updateTokenPos() {
-        players.forEach((p, i) => {
-            const t = document.getElementById(`tk-${p.id}`);
-            const cell = document.getElementById(`cell-${p.pos}`);
-            const bRect = document.getElementById('board').getBoundingClientRect();
-            const cRect = cell.getBoundingClientRect();
-            t.style.left = (cRect.left - bRect.left + 5 + (i*8)) + 'px';
-            t.style.top = (cRect.top - bRect.top + 5) + 'px';
-        });
+        if(p.money >= 0 && turn === pId) finishTurn();
     }
 
     function updateUI() {
         const pList = document.getElementById('players-list');
         pList.innerHTML = '';
         players.forEach((p, i) => {
-            pList.innerHTML += `<div class="${p.isOut?'player-out':''} " style="border-left:5px solid ${p.color}; padding:8px; margin-bottom:5px; background:${turn===i?'#e0f2fe':'#f1f5f9'}; font-size:12px">
-                <b>${p.name}</b>: <span style="color:${p.money<0?'red':'black'}">$${p.money}</span>
-            </div>`;
+            const isTurn = turn === i;
+            pList.innerHTML += `
+                <div class="player-status-card ${isTurn ? 'active-turn-indicator' : ''} ${p.isOut?'player-out':''}" 
+                     style="background: ${isTurn ? p.color + '22' : '#f8fafc'}; border-left-color: ${p.color}">
+                    <div style="font-size:14px"><b>${p.name}</b></div>
+                    <div style="color:${p.money<0?'red':'green'}; font-weight:bold">$${p.money}</div>
+                </div>`;
         });
         
         const activeP = players[turn];
         document.getElementById('current-p-label').innerText = "TURNO DE: " + activeP.name;
 
-        const btnContainer = document.getElementById('turn-action-container');
         if(activeP.money < 0 && !activeP.isBot) {
-            btnContainer.innerHTML = `<div class="alert-deuda">DEUDA DE $${Math.abs(activeP.money)}<br>Vendé propiedades para seguir.</div>`;
-            if(activeP.props.length === 0) btnContainer.innerHTML += `<button class="btn-main" style="background:black" onclick="eliminarJugador(players[turn])">BANCARROTA</button>`;
-        } else {
-            btnContainer.innerHTML = `<button id="roll-btn" class="btn-main" onclick="playTurn()" ${activeP.isBot?'disabled':''}>🎲 LANZAR DADOS</button>`;
+            document.getElementById('controls').innerHTML = `<div class="alert-deuda">SALDO NEGATIVO: $${activeP.money}</div>`;
+            if(activeP.props.length === 0) document.getElementById('controls').innerHTML += `<button class="btn-main" style="background:black" onclick="eliminarJugador(players[turn])">BANCARROTA</button>`;
+        } else if (!activeP.isBot && document.getElementById('roll-btn') === null) {
+            // Restaurar controles si no es bot y no existen
+            location.reload(); // Simplificado para el ejemplo
         }
 
         const tCont = document.getElementById('tabs-container');
@@ -382,6 +323,7 @@
         players.forEach((p, i) => {
             const tab = document.createElement('div');
             tab.className = `tab ${viewTab === i ? 'active' : ''}`;
+            tab.style.borderBottom = `3px solid ${p.color}`;
             tab.innerText = p.name;
             tab.onclick = () => { viewTab = i; selectedPropName = null; updateUI(); };
             tCont.appendChild(tab);
@@ -394,52 +336,63 @@
         const propList = document.getElementById('prop-list');
         propList.innerHTML = '';
         const viewer = players[viewTab];
-
-        // ORDENAR PROPIEDADES SEGUN TABLERO
-        const orderedProps = config
-            .filter(tile => viewer.props.includes(tile.n))
-            .map(tile => tile.n);
+        const orderedProps = config.filter(tile => viewer.props.includes(tile.n)).map(tile => tile.n);
 
         orderedProps.forEach(pName => {
             const tile = config.find(c => c.n === pName);
-            const hCount = viewer.hotels[pName] || 0;
             const isSelected = selectedPropName === pName;
+            const hCount = viewer.hotels[pName] || 0;
             
             const div = document.createElement('div');
             div.className = `prop-item ${isSelected ? 'selected' : ''}`;
             div.style.borderTop = `4px solid ${tile.c}`;
-            div.onclick = () => { 
-                selectedPropName = isSelected ? null : pName; 
-                updateUI(); 
-            };
+            div.onclick = () => { selectedPropName = isSelected ? null : pName; updateUI(); };
 
-            let content = `<b>${pName}</b> <small>(${tile.prov})</small><br>
-                           Renta actual: $${tile.r * (1 + hCount)}`;
-
+            let content = `<b>${pName}</b> <small>Renta: $${tile.r * (1+hCount)}</small>`;
             if(isSelected) {
-                const provTiles = config.filter(c => c.cid === tile.cid).map(c => c.n);
-                const hasMonopoly = provTiles.every(name => viewer.props.includes(name));
-                const sellPrice = Math.floor(tile.pr / 2);
-
-                content += `<div class="rent-details">
-                                • Base: $${tile.r}<br>
-                                • 1 Hotel: $${tile.r * 2}<br>
-                                • 2 Hoteles: $${tile.r * 3}<br>
-                                • 3 Hoteles: $${tile.r * 4}<br>
-                                • 4 Hoteles: $${tile.r * 5}
-                            </div>`;
-                
+                content += `<div class="rent-details">Base: $${tile.r} | +1 Hotel: $${tile.r*2} | +2: $${tile.r*3} | +3: $${tile.r*4} | +4: $${tile.r*5}</div>`;
+                const hasMonopoly = config.filter(c => c.cid === tile.cid).every(c => viewer.props.includes(c.n));
                 if(hasMonopoly && hCount < 4 && viewer.id === turn && !viewer.isBot) {
-                    content += `<button class="btn-hotel" onclick="event.stopPropagation(); buildHotel('${pName}')">CONSTRUIR HOTEL ($${Math.floor(tile.pr*0.7)})</button>`;
+                    content += `<button class="btn-hotel" onclick="event.stopPropagation(); buildHotel('${pName}')">MEJORAR ($${Math.floor(tile.pr*0.7)})</button>`;
                 }
-                
-                if(viewer.id === turn && !viewer.isBot) {
-                    content += `<button class="btn-sell" onclick="event.stopPropagation(); sellProp(${viewer.id}, '${pName}')">VENDER POR $${sellPrice}</button>`;
-                }
+                if(viewer.id === turn && !viewer.isBot) content += `<button class="btn-sell" onclick="event.stopPropagation(); sellProp(${viewer.id}, '${pName}')">VENDER POR $${Math.floor(tile.pr/2)}</button>`;
             }
-
             div.innerHTML = content;
             propList.appendChild(div);
+        });
+    }
+
+    function buildHotel(propName) {
+        const p = players[turn];
+        const tile = config.find(c => c.n === propName);
+        const cost = Math.floor(tile.pr * 0.7);
+        const current = p.hotels[propName] || 0;
+        if(p.money >= cost) {
+            p.money -= cost; p.hotels[propName] = current + 1;
+            document.querySelectorAll(`#h-${config.indexOf(tile)} .hotel-dot`)[current].style.display = 'block';
+            updateUI();
+        }
+    }
+
+    function botResolveDebt(p) {
+        while(p.money < 0 && p.props.length > 0) sellProp(p.id, p.props[0]);
+        if(p.money < 0) eliminarJugador(p); else finishTurn();
+    }
+
+    function eliminarJugador(p) {
+        p.isOut = true; addLog(`${p.name} ELIMINADO`);
+        if(players.filter(pl => !pl.isOut).length === 1) { alert("¡FIN DEL JUEGO!"); location.reload(); }
+        finishTurn();
+    }
+
+    function updateTokenPos() {
+        players.forEach((p, i) => {
+            const t = document.getElementById(`tk-${p.id}`);
+            const cell = document.getElementById(`cell-${p.pos}`);
+            const bRect = document.getElementById('board').getBoundingClientRect();
+            const cRect = cell.getBoundingClientRect();
+            t.style.left = (cRect.left - bRect.left + 8 + (i*6)) + 'px';
+            t.style.top = (cRect.top - bRect.top + 8) + 'px';
         });
     }
 
