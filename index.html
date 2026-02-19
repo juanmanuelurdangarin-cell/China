@@ -3,233 +3,291 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ArgenPoly Deluxe - Edición Hoteles</title>
+    <title>ArgenPoly - Pro Edition</title>
     <style>
         :root {
             --bg: #0f172a;
-            --board-bg: #f1f5f9;
             --panel: #ffffff;
             --primary: #0081C9;
             --accent: #f59e0b;
         }
 
+        * { box-sizing: border-box; }
         body { 
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            background: var(--bg);
-            margin: 0;
-            height: 100vh;
+            font-family: 'Segoe UI', sans-serif; 
+            background: var(--bg); 
+            margin: 0; 
+            color: #1e293b;
             display: flex;
             justify-content: center;
             align-items: center;
-            color: #1e293b;
+            min-height: 100vh;
         }
 
+        /* MENU INICIAL */
+        #setup-menu {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+
+        .input-group { margin: 15px 0; text-align: left; }
+        input, select { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; }
+
+        /* LAYOUT PRINCIPAL */
         #game-container {
-            display: grid;
-            grid-template-columns: 260px 600px 340px;
-            gap: 15px;
-            background: rgba(255,255,255,0.05);
-            padding: 20px;
-            border-radius: 24px;
-            backdrop-filter: blur(10px);
-            height: 650px;
+            display: none;
+            flex-direction: column;
+            width: 100%;
+            max-width: 1200px;
+            height: 95vh;
+            gap: 10px;
+            padding: 10px;
         }
 
-        /* TABLERO */
+        @media (min-width: 1024px) {
+            #game-container { flex-direction: row; }
+        }
+
+        /* TABLERO CUADRADO RESPONSIVO */
+        #board-wrapper {
+            flex: 2;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #e2e8f0;
+            border-radius: 15px;
+            position: relative;
+            aspect-ratio: 1/1;
+        }
+
         #board {
-            width: 600px;
-            height: 600px;
-            background: var(--board-bg);
             display: grid;
             grid-template-columns: repeat(6, 1fr);
             grid-template-rows: repeat(6, 1fr);
-            gap: 4px;
-            padding: 4px;
-            border-radius: 12px;
-            position: relative;
-        }
-
-        .center-space {
-            grid-column: 2 / 6;
-            grid-row: 2 / 6;
-            background: white;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            border-radius: 8px;
-            box-shadow: inset 0 0 30px rgba(0,0,0,0.05);
+            gap: 2px;
+            width: 100%;
+            height: 100%;
+            padding: 5px;
         }
 
         .cell {
             background: white;
+            border: 1px solid #ddd;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: space-between;
-            padding: 5px;
-            font-size: 10px;
+            justify-content: flex-end;
+            font-size: clamp(8px, 1.5vw, 10px);
             font-weight: bold;
             position: relative;
-            overflow: hidden;
+            padding-bottom: 2px;
         }
 
-        .cell-color { height: 12px; width: 100%; position: absolute; top: 0; }
+        .cell-color { position: absolute; top: 0; width: 100%; height: 20%; }
         
-        .hotel-icon {
+        /* HOTELES */
+        .hotels-row {
+            display: flex;
+            gap: 1px;
             position: absolute;
-            bottom: 2px;
-            right: 2px;
-            font-size: 16px;
-            filter: drop-shadow(0 0 2px rgba(0,0,0,0.2));
+            top: 22%;
+            width: 100%;
+            justify-content: center;
         }
-
-        .has-hotel { background: #fffbeb; border: 1px solid var(--accent); }
+        .hotel-dot { width: 6px; height: 6px; background: red; border-radius: 50%; display: none; }
+        .has-hotel .hotel-dot { display: block; }
 
         /* FICHAS */
         .token {
-            width: 18px; height: 18px; border-radius: 50%;
+            width: 16px; height: 16px; border-radius: 50%;
             border: 2px solid white; position: absolute;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 50; box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            z-index: 100; transition: all 0.3s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.4);
         }
 
-        /* PANELES */
-        .side-panel {
-            background: var(--panel);
-            border-radius: 18px;
+        /* PANELES LATERALES */
+        .ui-panel {
+            flex: 1;
+            background: white;
+            border-radius: 15px;
             padding: 15px;
             display: flex;
             flex-direction: column;
-            max-height: 100%;
+            overflow: hidden;
         }
 
         #log {
-            height: 180px; /* Tamaño fijo */
+            height: 120px;
             background: #1e293b;
             color: #38bdf8;
-            padding: 12px;
-            font-family: 'Consolas', monospace;
+            padding: 10px;
+            font-family: monospace;
             font-size: 11px;
-            border-radius: 8px;
-            overflow-y: scroll; /* Barra siempre activa */
-            margin-top: 10px;
-        }
-
-        #cards-container {
-            flex-grow: 1;
             overflow-y: auto;
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 8px;
-            margin-top: 10px;
-        }
-
-        .property-card {
-            border: 1px solid #e2e8f0;
-            padding: 8px;
             border-radius: 8px;
-            background: #f8fafc;
-            position: relative;
+            margin: 10px 0;
         }
 
-        .btn-hotel {
-            background: #10b981;
-            color: white;
-            border: none;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 9px;
-            cursor: pointer;
-            margin-top: 5px;
+        /* PESTAÑAS DE PROPIEDADES */
+        .tabs { display: flex; gap: 5px; margin-bottom: 10px; overflow-x: auto; }
+        .tab { 
+            padding: 5px 10px; border-radius: 5px; background: #eee; 
+            cursor: pointer; font-size: 12px; white-space: nowrap;
+        }
+        .tab.active { background: var(--primary); color: white; }
+
+        #prop-list { flex-grow: 1; overflow-y: auto; }
+        .prop-item { 
+            padding: 8px; border: 1px solid #eee; border-radius: 8px; 
+            margin-bottom: 5px; font-size: 12px;
         }
 
-        button#roll-btn {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            border-radius: 12px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.2s;
+        .btn-main {
+            background: var(--primary); color: white; border: none;
+            padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer;
         }
+        .btn-main:disabled { background: #ccc; }
 
-        button#roll-btn:disabled { background: #94a3b8; cursor: not-allowed; }
-
-        .player-info {
-            padding: 12px;
-            margin-bottom: 8px;
-            border-radius: 12px;
-            background: #f1f5f9;
-            border-left: 6px solid #cbd5e1;
+        .center-ui {
+            grid-column: 2/6; grid-row: 2/6;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            background: #f8fafc; border-radius: 10px;
         }
-        .player-info.active { border-left-color: var(--primary); background: #e0f2fe; }
     </style>
 </head>
 <body>
 
+<div id="setup-menu">
+    <h2>🇦🇷 ArgenPoly</h2>
+    <div class="input-group">
+        <label>Modo de Juego:</label>
+        <select id="mode-select" onchange="toggleInputs()">
+            <option value="bot">Contra el Servidor</option>
+            <option value="multi">Multijugador (Hasta 4)</option>
+        </select>
+    </div>
+    <div id="player-names">
+        <div class="input-group">
+            <input type="text" id="p1-name" placeholder="Nombre Jugador 1">
+        </div>
+    </div>
+    <div id="multi-options" style="display:none">
+        <div class="input-group">
+            <label>Cantidad de jugadores:</label>
+            <select id="player-qty" onchange="generateNameInputs()">
+                <option value="2">2 Jugadores</option>
+                <option value="3">3 Jugadores</option>
+                <option value="4">4 Jugadores</option>
+            </select>
+        </div>
+    </div>
+    <button class="btn-main" onclick="initGame()" style="width:100%">EMPEZAR VIAJE</button>
+</div>
+
 <div id="game-container">
-    <div class="side-panel">
-        <h3 style="margin:0">Viajeros</h3>
-        <div id="players-list" style="margin-top:15px"></div>
+    <div class="ui-panel" id="players-panel">
+        <h3>Viajeros</h3>
+        <div id="players-list"></div>
+        <div id="log"></div>
+        <button id="roll-btn" class="btn-main" onclick="playTurn()">LANZAR DADOS</button>
     </div>
 
-    <div id="board">
-        <div class="center-space">
-            <h1 style="color:var(--primary); margin:0; font-size:2.5rem">ARGENPOLY</h1>
-            <div id="dice" style="font-size:50px; margin:20px">⚀</div>
-            <button id="roll-btn" onclick="startTurn()">LANZAR DADOS</button>
+    <div id="board-wrapper">
+        <div id="board">
+            <div class="center-ui">
+                <div id="dice-val" style="font-size:40px">🎲</div>
+                <div id="current-turn-label" style="font-weight:bold; color:var(--primary)"></div>
+            </div>
         </div>
     </div>
 
-    <div class="side-panel">
-        <h3 style="margin:0">Movimientos</h3>
-        <div id="log"></div>
-        
-        <h3 style="margin:15px 0 5px 0">Tus Propiedades</h3>
-        <div id="cards-container"></div>
+    <div class="ui-panel">
+        <h3>Propiedades</h3>
+        <div class="tabs" id="tabs-container"></div>
+        <div id="prop-list"></div>
     </div>
 </div>
 
 <script>
-    const boardData = [
+    const config = [
         { n: "SALIDA", c: "#64748b", type: "start" },
-        { n: "Ushuaia", c: "#ef4444", pr: 150, rent: 50, colorId: "red" },
-        { n: "R. Gallegos", c: "#ef4444", pr: 180, rent: 60, colorId: "red" },
-        { n: "Viedma", c: "#f97316", pr: 220, rent: 80, colorId: "orange" },
-        { n: "Rawson", c: "#f97316", pr: 250, rent: 90, colorId: "orange" },
-        { n: "CÁRCEL", c: "#1e293b", type: "jail" },
-        { n: "Neuquén", c: "#eab308", pr: 300, rent: 110, colorId: "yellow" },
-        { n: "Mendoza", c: "#eab308", pr: 350, rent: 130, colorId: "yellow" },
-        { n: "San Juan", c: "#22c55e", pr: 400, rent: 160, colorId: "green" },
-        { n: "La Rioja", c: "#22c55e", pr: 450, rent: 180, colorId: "green" },
+        { n: "Ushuaia", c: "#ef4444", pr: 150, r: 40, cid: "red" },
+        { n: "R. Gallegos", c: "#ef4444", pr: 180, r: 50, cid: "red" },
+        { n: "Viedma", c: "#f97316", pr: 220, r: 65, cid: "orange" },
+        { n: "Rawson", c: "#f97316", pr: 250, r: 80, cid: "orange" },
+        { n: "CÁRCEL", c: "#334155", type: "jail" },
+        { n: "Neuquén", c: "#eab308", pr: 300, r: 100, cid: "yellow" },
+        { n: "Mendoza", c: "#eab308", pr: 350, r: 120, cid: "yellow" },
+        { n: "San Juan", c: "#22c55e", pr: 400, r: 150, cid: "green" },
+        { n: "La Rioja", c: "#22c55e", pr: 450, r: 180, cid: "green" },
         { n: "ARCA", c: "#fff", type: "special" },
-        { n: "Catamarca", c: "#06b6d4", pr: 500, rent: 210, colorId: "cyan" },
-        { n: "Tucumán", c: "#06b6d4", pr: 550, rent: 240, colorId: "cyan" },
-        { n: "Salta", c: "#3b82f6", pr: 600, rent: 280, colorId: "blue" },
-        { n: "Jujuy", c: "#3b82f6", pr: 650, rent: 310, colorId: "blue" },
+        { n: "Catamarca", c: "#06b6d4", pr: 500, r: 210, cid: "cyan" },
+        { n: "Tucumán", c: "#06b6d4", pr: 550, r: 250, cid: "cyan" },
+        { n: "Salta", c: "#3b82f6", pr: 600, r: 300, cid: "blue" },
+        { n: "Jujuy", c: "#3b82f6", pr: 650, r: 350, cid: "blue" },
         { n: "PARKING", c: "#1e293b", type: "special" },
-        { n: "Córdoba", c: "#8b5cf6", pr: 750, rent: 380, colorId: "purple" },
-        { n: "Rosario", c: "#8b5cf6", pr: 800, rent: 420, colorId: "purple" },
-        { n: "La Plata", c: "#ec4899", pr: 950, rent: 550, colorId: "pink" },
-        { n: "CABA", c: "#ec4899", pr: 1300, rent: 800, colorId: "pink" }
+        { n: "Córdoba", c: "#8b5cf6", pr: 750, r: 450, cid: "purple" },
+        { n: "Rosario", c: "#8b5cf6", pr: 800, r: 500, cid: "purple" },
+        { n: "La Plata", c: "#ec4899", pr: 950, r: 650, cid: "pink" },
+        { n: "CABA", c: "#ec4899", pr: 1300, r: 900, cid: "pink" }
     ];
 
-    let players = [
-        { id: 0, name: "Jugador 1", money: 2500, pos: 0, color: "#ef4444", props: [], hotels: [] },
-        { id: 1, name: "Servidor", money: 2500, pos: 0, color: "#3b82f6", props: [], hotels: [], isBot: true }
-    ];
+    let players = [];
     let turn = 0;
-    let isMoving = false;
+    let viewTab = 0;
+    const colors = ["#ef4444", "#3b82f6", "#10b981", "#f59e0b"];
 
-    // Inicializar Tablero Cuadrado
-    function init() {
+    function toggleInputs() {
+        const mode = document.getElementById('mode-select').value;
+        document.getElementById('multi-options').style.display = mode === 'bot' ? 'none' : 'block';
+        generateNameInputs();
+    }
+
+    function generateNameInputs() {
+        const mode = document.getElementById('mode-select').value;
+        const qty = mode === 'bot' ? 1 : parseInt(document.getElementById('player-qty').value);
+        const container = document.getElementById('player-names');
+        container.innerHTML = '';
+        for(let i=0; i<qty; i++) {
+            container.innerHTML += `<div class="input-group"><input type="text" id="p${i}-name" placeholder="Nombre Jugador ${i+1}"></div>`;
+        }
+    }
+
+    function initGame() {
+        const mode = document.getElementById('mode-select').value;
+        const qty = mode === 'bot' ? 1 : parseInt(document.getElementById('player-qty').value);
+        
+        players = [];
+        for(let i=0; i<qty; i++) {
+            players.push({
+                id: i,
+                name: document.getElementById(`p${i}-name`).value || `Jugador ${i+1}`,
+                money: 2000, pos: 0, color: colors[i], props: [], hotels: {}, isBot: false
+            });
+        }
+        if(mode === 'bot') {
+            players.push({ id: 1, name: "Servidor", money: 2000, pos: 0, color: colors[1], props: [], hotels: {}, isBot: true });
+        }
+
+        document.getElementById('setup-menu').style.display = 'none';
+        document.getElementById('game-container').style.display = 'flex';
+        
+        renderBoard();
+        updateUI();
+    }
+
+    function renderBoard() {
         const board = document.getElementById('board');
         const posMap = [[5,5],[4,5],[3,5],[2,5],[1,5],[0,5],[0,4],[0,3],[0,2],[0,1],[0,0],[1,0],[2,0],[3,0],[4,0],[5,0],[5,1],[5,2],[5,3],[5,4]];
         
-        boardData.forEach((d, i) => {
+        config.forEach((d, i) => {
             const cell = document.createElement('div');
             cell.className = 'cell';
             cell.id = `cell-${i}`;
@@ -237,9 +295,11 @@
             cell.style.gridRow = posMap[i][1] + 1;
             cell.innerHTML = `
                 ${d.pr ? `<div class="cell-color" style="background:${d.c}"></div>` : ''}
-                <div style="margin-top:12px">${d.n}</div>
-                ${d.pr ? `<div style="color:#16a34a">$${d.pr}</div>` : ''}
-                <div class="hotel-container"></div>
+                <div class="hotels-row" id="hotels-${i}">
+                    <div class="hotel-dot"></div><div class="hotel-dot"></div><div class="hotel-dot"></div><div class="hotel-dot"></div>
+                </div>
+                <div>${d.n}</div>
+                ${d.pr ? `<div style="color:green; font-size:8px">$${d.pr}</div>` : ''}
             `;
             board.appendChild(cell);
         });
@@ -249,171 +309,146 @@
             t.className = 'token';
             t.id = `token-${p.id}`;
             t.style.backgroundColor = p.color;
-            board.appendChild(t);
+            document.getElementById('board-wrapper').appendChild(t);
         });
-
-        updateTokens();
-        updateUI();
+        updateTokenPositions();
     }
 
-    async function startTurn() {
-        if(isMoving) return;
-        isMoving = true;
-        const btn = document.getElementById('roll-btn');
-        btn.disabled = true;
-
-        const diceEl = document.getElementById('dice');
-        diceEl.style.transform = "rotate(360deg)";
-        const roll = Math.floor(Math.random() * 6) + 1;
-        
-        await new Promise(r => setTimeout(r, 500));
-        diceEl.innerText = ['⚀','⚁','⚂','⚃','⚄','⚅'][roll-1];
-        diceEl.style.transform = "rotate(0deg)";
-
+    async function playTurn() {
         const p = players[turn];
-        addLog(`🎲 ${p.name} sacó ${roll}`);
+        if(p.isBot && turn !== 1) return; // Seguridad
+
+        document.getElementById('roll-btn').disabled = true;
+        const roll = Math.floor(Math.random() * 6) + 1;
+        document.getElementById('dice-val').innerText = ['⚀','⚁','⚂','⚃','⚄','⚅'][roll-1];
 
         for(let i=0; i<roll; i++) {
-            p.pos = (p.pos + 1) % boardData.length;
-            updateTokens();
-            if(p.pos === 0) { p.money += 200; addLog("💵 ¡Cobraste $200 de Salida!"); }
-            await new Promise(r => setTimeout(r, 250));
+            p.pos = (p.pos + 1) % config.length;
+            updateTokenPositions();
+            if(p.pos === 0) { p.money += 200; addLog(`${p.name} cobró $200 de salida`); }
+            await new Promise(r => setTimeout(r, 200));
         }
 
         handleLanding(p);
-        
-        turn = (turn + 1) % players.length;
-        isMoving = false;
-        updateUI();
-
-        if(players[turn].isBot) {
-            setTimeout(startTurn, 1500);
-        } else {
-            btn.disabled = false;
-        }
+        nextTurn();
     }
 
     function handleLanding(p) {
-        const tile = boardData[p.pos];
+        const tile = config[p.pos];
         if(!tile.pr) return;
 
         const owner = players.find(x => x.props.includes(tile.n));
-        
         if(owner && owner !== p) {
-            let finalRent = tile.rent;
-            if(owner.hotels.includes(tile.n)) finalRent *= 4; // Renta x4 con hotel
-            
-            p.money -= finalRent;
-            owner.money += finalRent;
-            addLog(`🚩 Pago de arancel: $${finalRent} a ${owner.name}`);
+            const hCount = owner.hotels[tile.n] || 0;
+            const rent = tile.r * (1 + hCount);
+            p.money -= rent;
+            owner.money += rent;
+            addLog(`${p.name} pagó $${rent} a ${owner.name}`);
         } else if(!owner && p.money >= tile.pr) {
-            // IA del servidor compra siempre si tiene dinero
-            if(!p.isBot || (p.isBot && p.money > tile.pr + 500)) {
+            if(!p.isBot || (p.isBot && p.money > 800)) {
                 p.money -= tile.pr;
                 p.props.push(tile.n);
-                addLog(`🏠 ${p.name} compró ${tile.n}`);
+                addLog(`${p.name} compró ${tile.n}`);
             }
         }
-        
-        // El servidor compra hoteles automáticamente si puede
-        if(p.isBot) checkBotHotels(p);
     }
 
-    function buyHotel(propName) {
-        const p = players[0]; // Jugador humano
-        const tile = boardData.find(b => b.n === propName);
-        const hotelPrice = Math.floor(tile.pr * 1.5);
+    function buyHotel(pId, propName) {
+        const p = players[pId];
+        const tile = config.find(c => c.n === propName);
+        const cost = Math.floor(tile.pr * 0.8);
+        const currentHotels = p.hotels[propName] || 0;
 
-        if(p.money >= hotelPrice && !p.hotels.includes(propName)) {
-            p.money -= hotelPrice;
-            p.hotels.push(propName);
-            addLog(`🏨 ¡Hotel construido en ${propName}! ($${hotelPrice})`);
-            
-            const cell = document.getElementById(`cell-${boardData.indexOf(tile)}`);
-            cell.classList.add('has-hotel');
-            cell.querySelector('.hotel-container').innerHTML = `<span class="hotel-icon">🏨</span>`;
+        if(p.money >= cost && currentHotels < 4) {
+            p.money -= cost;
+            p.hotels[propName] = currentHotels + 1;
+            addLog(`${p.name} construyó un hotel en ${propName}`);
+            updateBoardHotels(config.indexOf(tile), p.hotels[propName]);
             updateUI();
         }
     }
 
-    function checkBotHotels(bot) {
-        boardData.forEach(tile => {
-            if(tile.colorId && canBuildHotel(bot, tile.colorId) && !bot.hotels.includes(tile.n)) {
-                const cost = Math.floor(tile.pr * 1.5);
-                if(bot.money > cost + 400) {
-                    bot.money -= cost;
-                    bot.hotels.push(tile.n);
-                    const cell = document.getElementById(`cell-${boardData.indexOf(tile)}`);
-                    cell.classList.add('has-hotel');
-                    cell.querySelector('.hotel-container').innerHTML = `<span class="hotel-icon">🏨</span>`;
-                }
-            }
+    function updateBoardHotels(cellIdx, count) {
+        const dots = document.querySelectorAll(`#hotels-${cellIdx} .hotel-dot`);
+        dots.forEach((d, i) => {
+            d.parentElement.parentElement.classList.add('has-hotel');
+            d.style.display = i < count ? 'block' : 'none';
         });
     }
 
-    function canBuildHotel(player, colorId) {
-        const propsInColor = boardData.filter(b => b.colorId === colorId).map(b => b.n);
-        return propsInColor.every(name => player.props.includes(name));
+    function nextTurn() {
+        turn = (turn + 1) % players.length;
+        updateUI();
+        if(players[turn].isBot) {
+            setTimeout(playTurn, 1000);
+        } else {
+            document.getElementById('roll-btn').disabled = false;
+        }
     }
 
-    function updateTokens() {
-        players.forEach(p => {
+    function updateTokenPositions() {
+        players.forEach((p, i) => {
             const t = document.getElementById(`token-${p.id}`);
             const cell = document.getElementById(`cell-${p.pos}`);
-            const rect = cell.getBoundingClientRect();
             const bRect = document.getElementById('board').getBoundingClientRect();
+            const cRect = cell.getBoundingClientRect();
             
-            t.style.left = (rect.left - bRect.left + 10 + (p.id*12)) + 'px';
-            t.style.top = (rect.top - bRect.top + 20) + 'px';
+            const offsetX = (i % 2) * 15;
+            const offsetY = Math.floor(i / 2) * 15;
+
+            t.style.left = (cRect.left - bRect.left + 5 + offsetX) + 'px';
+            t.style.top = (cRect.top - bRect.top + 5 + offsetY) + 'px';
         });
     }
 
     function updateUI() {
-        // Lista Jugadores
-        const list = document.getElementById('players-list');
-        list.innerHTML = '';
+        // Jugadores
+        const pList = document.getElementById('players-list');
+        pList.innerHTML = '';
         players.forEach((p, i) => {
-            const div = document.createElement('div');
-            div.className = `player-info ${turn === i ? 'active' : ''}`;
-            div.style.borderLeftColor = p.color;
-            div.innerHTML = `<b>${p.name}</b><br>💰 $${p.money}`;
-            list.appendChild(div);
+            pList.innerHTML += `
+                <div style="border-left: 5px solid ${p.color}; padding:5px; margin-bottom:5px; background:${turn===i?'#e0f2fe':'#f1f5f9'}">
+                    <b>${p.name}</b>: $${p.money}
+                </div>`;
+        });
+        document.getElementById('current-turn-label').innerText = "Turno de: " + players[turn].name;
+
+        // Pestañas
+        const tCont = document.getElementById('tabs-container');
+        tCont.innerHTML = '';
+        players.forEach((p, i) => {
+            const tab = document.createElement('div');
+            tab.className = `tab ${viewTab === i ? 'active' : ''}`;
+            tab.innerText = p.name;
+            tab.onclick = () => { viewTab = i; updateUI(); };
+            tCont.appendChild(tab);
         });
 
-        // Cartas Jugador 1
-        const cont = document.getElementById('cards-container');
-        cont.innerHTML = '';
-        players[0].props.forEach(pName => {
-            const tile = boardData.find(b => b.n === pName);
-            const hasAll = canBuildHotel(players[0], tile.colorId);
-            const hotelPrice = Math.floor(tile.pr * 1.5);
-            
-            const div = document.createElement('div');
-            div.className = 'property-card';
-            div.style.borderTop = `5px solid ${tile.c}`;
-            div.innerHTML = `
-                <b>${tile.n}</b><br>
-                Renta: $${players[0].hotels.includes(pName) ? tile.rent*4 : tile.rent}<br>
-                ${hasAll && !players[0].hotels.includes(pName) ? 
-                    `<button class="btn-hotel" onclick="buyHotel('${pName}')">Poner Hotel ($${hotelPrice})</button>` : 
-                    (players[0].hotels.includes(pName) ? '⭐ Tiene Hotel' : '')}
-            `;
-            cont.appendChild(div);
+        // Propiedades del jugador seleccionado
+        const propList = document.getElementById('prop-list');
+        propList.innerHTML = '';
+        const viewer = players[viewTab];
+        viewer.props.forEach(pName => {
+            const tile = config.find(c => c.n === pName);
+            const hCount = viewer.hotels[pName] || 0;
+            const hotelCost = Math.floor(tile.pr * 0.8);
+            const canBuild = (viewer.id === turn && !viewer.isBot && hCount < 4 && viewer.money >= hotelCost);
+
+            propList.innerHTML += `
+                <div class="prop-item" style="border-top: 4px solid ${tile.c}">
+                    <b>${pName}</b> (Hoteles: ${hCount})<br>
+                    Renta actual: $${tile.r * (1+hCount)}<br>
+                    ${canBuild ? `<button onclick="buyHotel(${viewer.id}, '${pName}')" style="font-size:10px; padding:2px 5px">Construir Hotel ($${hotelCost})</button>` : ''}
+                </div>`;
         });
     }
 
     function addLog(msg) {
-        const log = document.getElementById('log');
-        const entry = document.createElement('div');
-        entry.style.marginBottom = "5px";
-        entry.style.borderBottom = "1px solid #334155";
-        entry.style.paddingBottom = "2px";
-        entry.innerText = `> ${msg}`;
-        log.appendChild(entry);
-        log.scrollTop = log.scrollHeight; // Auto-scroll al final
+        const l = document.getElementById('log');
+        l.innerHTML = `<div>> ${msg}</div>` + l.innerHTML;
     }
 
-    init();
+    generateNameInputs();
 </script>
 </body>
 </html>
