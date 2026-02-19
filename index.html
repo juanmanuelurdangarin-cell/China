@@ -1,369 +1,190 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ArgenPoly 2.0</title>
-    <style>
-        :root {
-            --bg: #eef2f7;
-            --panel: #ffffff;
-            --primary: #0081C9;
-            --accent: #FFB100;
-            --text: #2c3e50;
-        }
+<meta charset="UTF-8">
+<title>Monopoly Argentina</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(to bottom, #74acdf, white);
+    text-align: center;
+}
 
-        body { 
-            font-family: 'Segoe UI', Roboto, sans-serif; 
-            background: var(--bg); 
-            color: var(--text);
-            margin: 0; 
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-        }
+h1 {
+    color: #0033a0;
+}
 
-        /* Contenedor Principal */
-        #main-app {
-            display: flex;
-            width: 95vw;
-            height: 90vh;
-            background: var(--panel);
-            border-radius: 24px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.1);
-            padding: 20px;
-            gap: 20px;
-        }
+#board {
+    display: grid;
+    grid-template-columns: repeat(5, 120px);
+    grid-template-rows: repeat(5, 120px);
+    gap: 4px;
+    margin: 20px auto;
+    width: 620px;
+}
 
-        /* Sección Izquierda: Jugadores */
-        #side-players {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
+.cell {
+    background: white;
+    border: 2px solid black;
+    font-size: 12px;
+    padding: 5px;
+    position: relative;
+}
 
-        .player-card {
-            padding: 15px;
-            border-radius: 15px;
-            background: #f8fafc;
-            border-left: 8px solid #ccc;
-            transition: all 0.3s;
-        }
+.player {
+    font-size: 18px;
+    font-weight: bold;
+}
 
-        .player-card.active {
-            transform: scale(1.05);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            background: white;
-        }
+.controls {
+    margin-top: 20px;
+}
 
-        /* Sección Central: Tablero */
-        #board-viewport {
-            flex: 2;
-            position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: radial-gradient(circle, #ffffff 0%, #dbeafe 100%);
-            border-radius: 20px;
-            overflow: hidden;
-        }
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #0033a0;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
 
-        #board-circle {
-            position: relative;
-            width: 500px;
-            height: 500px;
-            border-radius: 50%;
-            border: 10px solid #334155;
-        }
+button:hover {
+    background-color: #001f5c;
+}
 
-        .cell {
-            position: absolute;
-            width: 70px;
-            height: 80px;
-            background: white;
-            border: 1px solid #cbd5e1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
-            font-size: 9px;
-            font-weight: bold;
-            transform-origin: center 250px;
-        }
+#log {
+    margin-top: 20px;
+    height: 120px;
+    overflow-y: auto;
+    background: white;
+    border: 2px solid black;
+    padding: 10px;
+}
 
-        .cell-color { height: 12px; width: 100%; margin-bottom: 4px; }
-
-        /* Sección Derecha: Controles */
-        #side-controls {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .btn-roll {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 20px;
-            border-radius: 12px;
-            font-size: 1.2rem;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 4px 0 #005a8d;
-        }
-
-        .btn-roll:active { transform: translateY(2px); box-shadow: 0 2px 0 #005a8d; }
-
-        .game-log {
-            flex-grow: 1;
-            background: #1e293b;
-            color: #38bdf8;
-            padding: 15px;
-            border-radius: 12px;
-            font-family: 'Courier New', monospace;
-            font-size: 0.8rem;
-            overflow-y: auto;
-        }
-
-        /* Fichas y Cartas */
-        .token {
-            width: 14px; height: 14px; border-radius: 50%;
-            border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-        }
-
-        #property-pop {
-            position: absolute;
-            width: 140px;
-            padding: 10px;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            z-index: 1000;
-            display: none;
-            text-align: center;
-            border: 2px solid gold;
-            animation: bounce 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        @keyframes bounce { from { transform: scale(0); } to { transform: scale(1); } }
-
-        #dice-view { font-size: 3rem; margin: 10px 0; }
-
-        /* Pantalla Inicio */
-        #overlay {
-            position: fixed; inset: 0; background: var(--primary);
-            z-index: 2000; display: flex; flex-direction: column;
-            justify-content: center; align-items: center; color: white;
-        }
-    </style>
+img {
+    width: 80px;
+    margin-top: 10px;
+}
+</style>
 </head>
 <body>
 
-<div id="overlay">
-    <h1 style="font-size: 4rem; margin-bottom: 0;">ARGENPOLY</h1>
-    <p>El viaje financiero por Argentina</p>
-    <div style="background: white; padding: 30px; border-radius: 20px; color: #333; text-align: center;">
-        <h3>¿Cuántos viajan?</h3>
-        <select id="p-count" style="padding: 10px; font-size: 1.1rem; width: 100%;">
-            <option value="1">Tú vs Servidor</option>
-            <option value="2">2 Jugadores</option>
-            <option value="3">3 Jugadores</option>
-            <option value="4">4 Jugadores</option>
-        </select>
-        <button onclick="initGame()" class="btn-roll" style="margin-top: 20px; width: 100%;">EMPEZAR</button>
-    </div>
+<h1>Monopoly Argentina 🇦🇷</h1>
+
+<img src="https://upload.wikimedia.org/wikipedia/commons/1/1a/Flag_of_Argentina.svg">
+<img src="https://upload.wikimedia.org/wikipedia/commons/3/32/Escudo_de_la_Rep%C3%BAblica_Argentina.svg">
+
+<div id="board"></div>
+
+<div class="controls">
+    <button onclick="rollDice()">Tirar Dados</button>
+    <button onclick="endGame()">Finalizar Juego</button>
 </div>
 
-<div id="main-app">
-    <div id="side-players">
-        <h2 style="margin: 0 0 10px 0;">Viajeros</h2>
-        <div id="players-list"></div>
-    </div>
+<h3>Jugador 1: $<span id="money1">1500</span> | Posición: <span id="pos1">0</span></h3>
+<h3>Jugador 2: $<span id="money2">1500</span> | Posición: <span id="pos2">0</span></h3>
 
-    <div id="board-viewport">
-        <div id="property-pop"></div>
-        <div id="board-circle">
-            <div style="position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; pointer-events: none;">
-                <span style="font-size: 1.2rem; font-weight: 900; color: #64748b;">ARGENPOLY</span>
-                <div id="dice-view">🎲</div>
-            </div>
-        </div>
-    </div>
-
-    <div id="side-controls">
-        <div id="turn-info" style="text-align: center;">
-            <p style="margin: 0; color: #64748b;">Es el turno de:</p>
-            <h2 id="active-p-name" style="margin: 5px 0;">-</h2>
-        </div>
-        <button id="roll-btn" class="btn-roll" onclick="handleTurn()">LANZAR DADOS</button>
-        <div class="game-log" id="log"></div>
-    </div>
-</div>
+<div id="log"></div>
 
 <script>
-    const config = [
-        { n: "SALIDA", c: "#94a3b8", type: "start" },
-        { n: "Ushuaia", p: "T. del Fuego", c: "#f87171", pr: 150 },
-        { n: "Río Gallegos", p: "Santa Cruz", c: "#f87171", pr: 180 },
-        { n: "Rawson", p: "Chubut", c: "#fb923c", pr: 220 },
-        { n: "Puerto Madryn", p: "Chubut", c: "#fb923c", pr: 250 },
-        { n: "SUERTE", c: "#fff", type: "luck" },
-        { n: "Neuquén", p: "Neuquén", c: "#fbbf24", pr: 300 },
-        { n: "Mendoza", p: "Mendoza", c: "#facc15", pr: 350 },
-        { n: "San Rafael", p: "Mendoza", c: "#facc15", pr: 380 },
-        { n: "ARCA", c: "#fff", type: "chest" },
-        { n: "Córdoba", p: "Córdoba", c: "#4ade80", pr: 450 },
-        { n: "Carlos Paz", p: "Córdoba", c: "#4ade80", pr: 480 },
-        { n: "Santa Fe", p: "Santa Fe", c: "#2dd4bf", pr: 520 },
-        { n: "Rosario", p: "Santa Fe", c: "#2dd4bf", pr: 550 },
-        { n: "CÁRCEL", c: "#1e293b", type: "jail" },
-        { n: "Mar del Plata", p: "Bs As", c: "#60a5fa", pr: 650 },
-        { n: "La Plata", p: "Bs As", c: "#60a5fa", pr: 700 },
-        { n: "CABA", p: "Capital", c: "#818cf8", pr: 1000 }
-    ];
+const properties = [
+    {name:"Salida 🇦🇷", price:0, owner:null},
+    {name:"Buenos Aires - La Plata", price:100, owner:null},
+    {name:"Córdoba - Córdoba Capital", price:120, owner:null},
+    {name:"Santa Fe - Rosario", price:130, owner:null},
+    {name:"Mendoza - Mendoza Capital", price:140, owner:null},
+    {name:"San Juan - San Juan", price:150, owner:null},
+    {name:"Salta - Salta Capital", price:160, owner:null},
+    {name:"Tucumán - San Miguel", price:170, owner:null},
+    {name:"Entre Ríos - Paraná", price:180, owner:null},
+    {name:"Chubut - Comodoro Rivadavia", price:190, owner:null},
+    {name:"Río Negro - Bariloche", price:200, owner:null},
+    {name:"Neuquén - Neuquén Capital", price:210, owner:null},
+    {name:"Misiones - Posadas", price:220, owner:null},
+    {name:"Jujuy - San Salvador", price:230, owner:null},
+    {name:"Cárcel", price:0, owner:null},
+    {name:"La Pampa - Santa Rosa", price:240, owner:null},
+    {name:"Formosa - Formosa", price:250, owner:null},
+    {name:"Chaco - Resistencia", price:260, owner:null},
+    {name:"Corrientes - Corrientes", price:270, owner:null},
+    {name:"Ir a la Cárcel", price:0, owner:null}
+];
 
-    let players = [];
-    let turn = 0;
+let players = [
+    {position:0, money:1500},
+    {position:0, money:1500}
+];
 
-    function initGame() {
-        const count = parseInt(document.getElementById('p-count').value);
-        const colors = ['#ef4444', '#3b82f6', '#10b981', '#f59e0b'];
-        
-        players = [];
-        const total = count === 1 ? 2 : count;
-        for(let i=0; i<total; i++) {
-            players.push({
-                name: (i===1 && count===1) ? "Servidor" : `Jugador ${i+1}`,
-                money: 2000,
-                pos: 0,
-                color: colors[i],
-                isBot: (i===1 && count===1),
-                props: []
-            });
-        }
+let currentPlayer = 0;
 
-        document.getElementById('overlay').style.display = 'none';
-        renderBoard();
-        updateUI();
+function createBoard(){
+    const board = document.getElementById("board");
+    properties.forEach((prop, index)=>{
+        const cell = document.createElement("div");
+        cell.className="cell";
+        cell.id="cell"+index;
+        cell.innerHTML=prop.name+"<br>$"+prop.price;
+        board.appendChild(cell);
+    });
+}
+createBoard();
+
+function rollDice(){
+    let dice = Math.floor(Math.random()*6)+1;
+    let player = players[currentPlayer];
+
+    player.position = (player.position + dice) % properties.length;
+
+    if(player.position === 0){
+        player.money += 200;
+        log("Jugador "+(currentPlayer+1)+" pasó por Salida y cobró $200");
     }
 
-    function renderBoard() {
-        const board = document.getElementById('board-circle');
-        config.forEach((city, i) => {
-            const angle = (i / config.length) * (Math.PI * 2);
-            const el = document.createElement('div');
-            el.className = 'cell';
-            el.style.transform = `rotate(${angle}rad)`;
-            
-            el.innerHTML = `
-                <div class="cell-color" style="background:${city.c}"></div>
-                <div style="padding: 2px">${city.n}</div>
-                ${city.pr ? `<div style="color:#16a34a">$${city.pr}</div>` : ''}
-                <div id="slot-${i}" style="display:flex; gap:2px; margin-top:auto; padding-bottom:5px"></div>
-            `;
-            board.appendChild(el);
-        });
-        updateTokens();
-    }
+    let prop = properties[player.position];
 
-    function handleTurn() {
-        const p = players[turn];
-        const dice = Math.floor(Math.random() * 6) + 1;
-        document.getElementById('dice-view').innerText = ['⚀','⚁','⚂','⚃','⚄','⚅'][dice-1];
-        
-        p.pos = (p.pos + dice) % config.length;
-        const city = config[p.pos];
-        
-        addLog(`${p.name} caminó hasta ${city.n}`);
-
-        if(city.pr) {
-            const owner = players.find(x => x.props.includes(city.n));
-            if(owner && owner !== p) {
-                const rent = Math.floor(city.pr * 0.3);
-                p.money -= rent;
-                owner.money += rent;
-                addLog(`Pago de arancel: $${rent} a ${owner.name}`);
-            } else if(!owner && p.money >= city.pr) {
-                p.money -= city.pr;
-                p.props.push(city.n);
-                showPropCard(city, p);
-                addLog(`${p.name} compró la propiedad.`);
-            }
-        } else if(city.type === "start") {
-            p.money += 200;
-            addLog("¡Bonus de salida! +$200");
-        }
-
-        updateTokens();
-        turn = (turn + 1) % players.length;
-        updateUI();
-
-        if(players[turn].isBot) {
-            document.getElementById('roll-btn').disabled = true;
-            setTimeout(() => {
-                handleTurn();
-                document.getElementById('roll-btn').disabled = false;
-            }, 1200);
+    if(prop.price > 0 && prop.owner === null){
+        if(player.money >= prop.price){
+            player.money -= prop.price;
+            prop.owner = currentPlayer;
+            log("Jugador "+(currentPlayer+1)+" compró "+prop.name);
         }
     }
-
-    function showPropCard(city, p) {
-        const pop = document.getElementById('property-pop');
-        pop.style.display = 'block';
-        pop.style.borderTop = `8px solid ${city.c}`;
-        pop.innerHTML = `
-            <small>ADQUIRIDO</small>
-            <h4 style="margin:5px 0">${city.n}</h4>
-            <p style="font-size:12px; margin:0">Arancel: $${Math.floor(city.pr*0.3)}</p>
-        `;
-        setTimeout(() => pop.style.display = 'none', 2000);
+    else if(prop.owner !== null && prop.owner !== currentPlayer){
+        let rent = 50;
+        player.money -= rent;
+        players[prop.owner].money += rent;
+        log("Jugador "+(currentPlayer+1)+" pagó $"+rent+" de alquiler");
+    }
+    else if(prop.name==="Ir a la Cárcel"){
+        player.position = 14;
+        log("Jugador "+(currentPlayer+1)+" fue a la Cárcel");
     }
 
-    function updateUI() {
-        const list = document.getElementById('players-list');
-        list.innerHTML = '';
-        players.forEach((p, i) => {
-            const div = document.createElement('div');
-            div.className = `player-card ${turn === i ? 'active' : ''}`;
-            div.style.borderLeftColor = p.color;
-            div.innerHTML = `
-                <div style="display:flex; justify-content:space-between">
-                    <b>${p.name}</b>
-                    <span style="color:#16a34a; font-weight:bold">$${p.money}</span>
-                </div>
-                <small>${p.props.length} Propiedades</small>
-            `;
-            list.appendChild(div);
-        });
+    updateDisplay();
+    currentPlayer = currentPlayer===0?1:0;
+}
 
-        const active = players[turn];
-        document.getElementById('active-p-name').innerText = active.name;
-        document.getElementById('active-p-name').style.color = active.color;
-    }
+function updateDisplay(){
+    document.getElementById("money1").innerText=players[0].money;
+    document.getElementById("money2").innerText=players[1].money;
+    document.getElementById("pos1").innerText=players[0].position;
+    document.getElementById("pos2").innerText=players[1].position;
+}
 
-    function updateTokens() {
-        players.forEach((p, i) => {
-            document.querySelectorAll(`[id^="slot-"]`).forEach(s => {
-                const t = s.querySelector(`[data-p="${i}"]`);
-                if(t) t.remove();
-            });
-            const slot = document.getElementById(`slot-${p.pos}`);
-            const t = document.createElement('div');
-            t.className = 'token';
-            t.dataset.p = i;
-            t.style.backgroundColor = p.color;
-            slot.appendChild(t);
-        });
-    }
+function log(text){
+    document.getElementById("log").innerHTML += text+"<br>";
+}
 
-    function addLog(msg) {
-        const log = document.getElementById('log');
-        log.innerHTML = `<div>> ${msg}</div>` + log.innerHTML;
+function endGame(){
+    if(players[0].money > players[1].money){
+        alert("Ganó Jugador 1 🇦🇷");
+    } else if(players[1].money > players[0].money){
+        alert("Ganó Jugador 2 🇦🇷");
+    } else {
+        alert("Empate 🇦🇷");
     }
+}
 </script>
 
 </body>
