@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ArgenPoly - Orden & Finanzas</title>
+    <title>ArgenPoly - Fixed Edition</title>
     <style>
         :root {
             --primary: #FFD93D; --secondary: #6BCB77; --accent: #4D96FF; 
@@ -17,78 +17,91 @@
             margin: 0; padding: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden;
         }
 
+        /* MENU */
         #setup-menu {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); z-index: 5000;
-            display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px;
+            position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); z-index: 9000;
+            display: flex; align-items: center; justify-content: center; padding: 20px;
         }
         .menu-card {
-            background: white; padding: 30px; border-radius: 40px; border: 8px solid var(--primary);
-            width: 100%; max-width: 400px; text-align: center;
+            background: white; padding: 25px; border-radius: 30px; border: 6px solid var(--primary);
+            width: 100%; max-width: 380px; text-align: center;
         }
 
+        /* JUEGO */
         #game-container { display: none; flex-direction: column; height: 100vh; }
         #top-section { padding: 5px; display: flex; justify-content: center; flex-shrink: 0; }
         
         #board {
             display: grid; grid-template-columns: repeat(6, 1fr); grid-template-rows: repeat(6, 1fr);
-            gap: 4px; width: 95vw; height: 95vw; max-width: 420px; max-height: 420px;
-            background: #fff; padding: 8px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            gap: 3px; width: 96vw; height: 96vw; max-width: 440px; max-height: 440px;
+            background: #fff; padding: 6px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
 
         .cell {
             background: #fff; border: 1px solid #eee; position: relative; 
             display: flex; flex-direction: column; align-items: center; justify-content: flex-end; 
-            padding: 2px; font-size: 8px; font-weight: 900; text-transform: uppercase;
+            padding: 2px; font-size: 7px; font-weight: 900; text-transform: uppercase;
         }
         .cell-color { position: absolute; top: 0; width: 100%; height: 28%; }
-        .hotel-indicator { position: absolute; top: 30%; font-size: 9px; letter-spacing: -2px; }
+        .hotel-indicator { position: absolute; top: 30%; font-size: 8px; }
 
         #bottom-section {
-            flex: 1; background: #fff; border-radius: 30px 30px 0 0;
+            flex: 1; background: #fff; border-radius: 25px 25px 0 0;
             padding: 15px; display: flex; flex-direction: column; overflow-y: auto;
         }
 
         .p-card {
-            min-width: 90px; padding: 10px; border-radius: 15px; background: #f8f9fa;
-            border-bottom: 5px solid #ccc; text-align: center; cursor: pointer;
+            min-width: 85px; padding: 8px; border-radius: 12px; background: #f8f9fa;
+            border-bottom: 4px solid #ccc; text-align: center; cursor: pointer; font-size: 11px;
         }
-        .p-card.active { border-bottom-color: var(--accent); background: #eef5ff; }
+        .p-card.active { border-bottom-color: var(--accent); background: #eef5ff; transform: scale(1.05); }
 
         .btn {
-            width: 100%; padding: 16px; border: none; border-radius: 15px;
-            font-weight: 900; font-size: 14px; color: white; cursor: pointer;
-            text-transform: uppercase; margin-bottom: 8px;
+            width: 100%; padding: 14px; border: none; border-radius: 12px;
+            font-weight: 900; font-size: 13px; color: white; cursor: pointer;
+            text-transform: uppercase; margin-bottom: 6px;
         }
         .btn-roll { background: var(--accent); }
         .btn-buy { background: var(--secondary); }
-        .btn-buy:disabled { background: #ccc !important; cursor: not-allowed; opacity: 0.8; }
+        .btn-buy:disabled { background: #ccc !important; opacity: 0.7; cursor: not-allowed; }
 
         .prop-card {
-            background: #fff; border-radius: 15px; padding: 12px; margin-bottom: 8px;
-            border: 2px solid #f0f0f0; border-left-width: 12px;
+            background: #fff; border-radius: 12px; padding: 10px; margin-bottom: 8px;
+            border: 1px solid #eee; border-left: 10px solid; cursor: pointer;
         }
-        .rent-table { display: none; font-size: 11px; margin-top: 10px; grid-template-columns: 1fr 1fr; gap: 5px; border-top: 1px dashed #eee; padding-top: 10px; }
+        .rent-table { display: none; font-size: 10px; margin-top: 8px; grid-template-columns: 1fr 1fr; gap: 4px; border-top: 1px dashed #eee; padding-top: 8px; }
         .prop-card.expanded .rent-table { display: grid; }
 
         #log {
-            background: #fdfdfd; padding: 8px; border-radius: 12px; height: 50px;
-            font-size: 10px; overflow-y: auto; margin-bottom: 10px; border: 1px solid #eee;
+            background: #fafafa; padding: 6px; border-radius: 10px; height: 45px;
+            font-size: 9px; overflow-y: auto; margin-bottom: 8px; border: 1px solid #eee;
         }
 
         .token {
             width: 16px; height: 16px; border-radius: 50%; border: 2px solid white;
             position: absolute; z-index: 100; transition: 0.3s;
         }
+
+        input, select { width: 100%; padding: 10px; margin-top: 5px; border-radius: 8px; border: 1px solid #ddd; }
     </style>
 </head>
 <body>
 
 <div id="setup-menu">
     <div class="menu-card">
-        <h1 style="color: var(--accent); margin:0;">🇦🇷 ARGENPOLY</h1>
-        <p style="font-weight:900; color: var(--secondary);">ORDEN INMOBILIARIO</p>
-        <input type="text" id="p0-name" placeholder="Tu Nombre" style="width:100%; padding:12px; border-radius:12px; border:2px solid #eee; margin: 20px 0;">
-        <button class="btn btn-roll" onclick="initGame()">¡EMPEZAR!</button>
+        <h1 style="color: var(--accent); margin:0; font-size:24px;">🇦🇷 ARGENPOLY</h1>
+        <p style="font-weight:bold; color: var(--secondary); font-size:12px;">EDICIÓN CORREGIDA</p>
+        
+        <div style="text-align:left; margin-top:15px;">
+            <label style="font-size:10px; font-weight:bold;">HUMANOS (MÁX 3 + MESSI)</label>
+            <select id="player-qty" onchange="generateInputs()">
+                <option value="1">1 Jugador</option>
+                <option value="2">2 Jugadores</option>
+                <option value="3">3 Jugadores</option>
+            </select>
+            <div id="names-box"></div>
+        </div>
+        <button class="btn btn-roll" onclick="initGame()" style="margin-top:20px;">¡JUGAR!</button>
     </div>
 </div>
 
@@ -96,230 +109,15 @@
     <div id="top-section">
         <div id="board">
             <div style="grid-column: 2/6; grid-row: 2/6; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-                <div id="dice-val" style="font-size: 50px;">🎲</div>
-                <div id="turn-label" style="font-weight:bold; font-size:10px; background:#f0f0f0; padding:4px 8px; border-radius:10px;"></div>
+                <div id="dice-val" style="font-size: 40px;">🎲</div>
+                <div id="turn-label" style="font-weight:900; font-size:9px; color:var(--accent); border:1px solid #ddd; padding:3px 8px; border-radius:10px;"></div>
             </div>
         </div>
     </div>
 
     <div id="bottom-section">
-        <div class="player-chips" id="players-list" style="display:flex; gap:8px; overflow-x:auto; padding-bottom:10px;"></div>
+        <div id="players-list" style="display:flex; gap:6px; overflow-x:auto; padding-bottom:8px;"></div>
         <div id="log"></div>
         <div id="action-btns">
             <button id="roll-btn" class="btn btn-roll" onclick="playTurn()">🎲 TIRAR DADOS</button>
-            <button id="buy-btn" class="btn btn-buy" style="display:none;" onclick="buyCurrentTile()">💰 COMPRAR</button>
-            <button id="end-btn" class="btn" style="display:none; background:#888;" onclick="finishTurn()">⏭ PASAR TURNO</button>
-        </div>
-        <h3 id="prop-view-title" style="margin:10px 0; font-size:11px; color:#555; text-transform:uppercase;">PROPIEDADES ADQUIRIDAS</h3>
-        <div id="prop-list"></div>
-    </div>
-</div>
-
-<script>
-    const config = [
-        { id: 0, n: "SALIDA", prov: "ESP", c: "#999", pr: 0, r: [0,0,0,0,0] },
-        { id: 1, n: "Ushuaia", prov: "TDF", c: "#FF6B6B", pr: 150, r: [50, 150, 450, 900, 1500] },
-        { id: 2, n: "R.Grande", prov: "TDF", c: "#FF6B6B", pr: 180, r: [60, 180, 500, 1000, 1600] },
-        { id: 3, n: "R.Gallegos", prov: "SC", c: "#FF9F45", pr: 220, r: [80, 220, 600, 1100, 1800] },
-        { id: 4, n: "Calafate", prov: "SC", c: "#FF9F45", pr: 250, r: [100, 250, 700, 1200, 2000] },
-        { id: 5, n: "VISITA", prov: "ESP", c: "#777", pr: 0, r: [0,0,0,0,0] },
-        { id: 6, n: "Rawson", prov: "CH", c: "#F9D923", pr: 300, r: [120, 300, 800, 1300, 2200] },
-        { id: 7, n: "Madryn", prov: "CH", c: "#F9D923", pr: 350, r: [150, 350, 900, 1400, 2500] },
-        { id: 8, n: "Viedma", prov: "RN", c: "#36AE7C", pr: 400, r: [180, 400, 1000, 1600, 2800] },
-        { id: 9, n: "Bariloche", prov: "RN", c: "#36AE7C", pr: 450, r: [200, 450, 1100, 1800, 3200] },
-        { id: 10, n: "SUERTE", prov: "ESP", c: "#4D96FF", pr: 0, r: [0,0,0,0,0] },
-        { id: 11, n: "Neuquén", prov: "NQ", c: "#187498", pr: 500, r: [250, 500, 1200, 2000, 3500] },
-        { id: 12, n: "S.M.Andes", prov: "NQ", c: "#187498", pr: 550, r: [280, 550, 1300, 2200, 3800] },
-        { id: 13, n: "Mendoza", prov: "MZ", c: "#4D96FF", pr: 600, r: [350, 700, 1500, 2500, 4200] },
-        { id: 14, n: "S.Rafael", prov: "MZ", c: "#4D96FF", pr: 650, r: [400, 800, 1700, 2800, 4500] },
-        { id: 15, n: "ARCA", prov: "ESP", c: "#FFD93D", pr: 0, r: [0,0,0,0,0] },
-        { id: 16, n: "Córdoba", prov: "CB", c: "#9C2CF3", pr: 750, r: [500, 1000, 2000, 3500, 5500] },
-        { id: 17, n: "C.Paz", prov: "CB", c: "#9C2CF3", pr: 800, r: [550, 1100, 2200, 4000, 6000] },
-        { id: 18, n: "La Plata", prov: "BA", c: "#EB4747", pr: 1000, r: [800, 1600, 3000, 5000, 7500] },
-        { id: 19, n: "M.Plata", prov: "BA", c: "#EB4747", pr: 1300, r: [1000, 2000, 4000, 6000, 9000] }
-    ];
-
-    let players = [];
-    let turn = 0;
-    let viewingPlayerIndex = 0;
-    let hotels = Array(20).fill(0);
-
-    function initGame() {
-        players = [
-            { id: 0, name: document.getElementById('p0-name').value || "Tú", money: 1500, pos: 0, color: "#4D96FF", props: [], isBot: false },
-            { id: 1, name: "Messi", money: 1500, pos: 0, color: "#555", props: [], isBot: true }
-        ];
-        document.getElementById('setup-menu').style.display = 'none';
-        document.getElementById('game-container').style.display = 'flex';
-        renderBoard();
-        updateUI();
-    }
-
-    function renderBoard() {
-        const board = document.getElementById('board');
-        const posMap = [[5,5],[4,5],[3,5],[2,5],[1,5],[0,5],[0,4],[0,3],[0,2],[0,1],[0,0],[1,0],[2,0],[3,0],[4,0],[5,0],[5,1],[5,2],[5,3],[5,4]];
-        board.innerHTML = `<div style="grid-column:2/6; grid-row:2/6; display:flex; flex-direction:column; align-items:center; justify-content:center;"><div id="dice-val" style="font-size:50px;">🎲</div><div id="turn-label" style="font-weight:bold; font-size:10px;"></div></div>`;
-        config.forEach((d, i) => {
-            const cell = document.createElement('div');
-            cell.className = 'cell'; cell.id = `cell-${i}`;
-            cell.style.gridColumn = posMap[i][0] + 1; cell.style.gridRow = posMap[i][1] + 1;
-            cell.innerHTML = d.pr ? `<div class="cell-color" style="background:${d.c}"></div><div class="hotel-indicator" id="h-${i}"></div><span>${d.n}</span>` : `<span>${d.n}</span>`;
-            board.appendChild(cell);
-        });
-        players.forEach(p => {
-            const t = document.createElement('div'); t.className = 'token'; t.id = `tk-${p.id}`; t.style.backgroundColor = p.color;
-            document.body.appendChild(t);
-        });
-        updateTokenPos();
-    }
-
-    async function playTurn() {
-        const p = players[turn];
-        document.getElementById('roll-btn').disabled = true;
-        const roll = Math.floor(Math.random() * 6) + 1;
-        document.getElementById('dice-val').innerText = "🎲";
-        await new Promise(r => setTimeout(r, 600));
-        document.getElementById('dice-val').innerText = ['⚀','⚁','⚂','⚃','⚄','⚅'][roll-1];
-
-        for(let i=0; i<roll; i++) {
-            p.pos = (p.pos + 1) % config.length;
-            if(p.pos === 0) p.money += 200;
-            updateTokenPos();
-            await new Promise(r => setTimeout(r, 200));
-        }
-        handleLanding(p);
-    }
-
-    function handleLanding(p) {
-        const tileIdx = p.pos;
-        const tile = config[tileIdx];
-        const owner = players.find(x => x.props.includes(tileIdx));
-        
-        if(owner && owner !== p) {
-            const rent = tile.r[hotels[tileIdx]];
-            p.money -= rent; owner.money += rent;
-            addLog(`${p.name} pagó $${rent} a ${owner.name}`);
-        } else if(!owner && tile.pr) {
-            const buyBtn = document.getElementById('buy-btn');
-            if(p.isBot) { 
-                if(p.money >= tile.pr + 300) buyCurrentTile(); 
-            } else {
-                buyBtn.style.display = 'block';
-                if(p.money < tile.pr) {
-                    buyBtn.disabled = true;
-                    buyBtn.innerText = "PLATA INSUFICIENTE";
-                } else {
-                    buyBtn.disabled = false;
-                    buyBtn.innerText = "💰 COMPRAR POR $" + tile.pr;
-                }
-            }
-        }
-        
-        if(p.isBot) {
-            p.props.forEach(pIdx => {
-                if(hasMonopoly(p, config[pIdx].prov) && p.money > 600 && hotels[pIdx] < 4) upgradeProperty(pIdx);
-            });
-            setTimeout(finishTurn, 1000);
-        } else {
-            document.getElementById('end-btn').style.display = 'block';
-        }
-        updateUI();
-    }
-
-    function hasMonopoly(player, province) {
-        if(province === "ESP") return false;
-        const provinceTiles = config.filter(c => c.prov === province);
-        return provinceTiles.every(t => player.props.includes(t.id));
-    }
-
-    function upgradeProperty(idx) {
-        const p = players[turn];
-        const cost = Math.floor(config[idx].pr * 0.8);
-        if(p.money >= cost && hotels[idx] < 4) {
-            p.money -= cost;
-            hotels[idx]++;
-            addLog(`${p.name} puso hotel en ${config[idx].n}`);
-            document.getElementById(`h-${idx}`).innerText = "🏨".repeat(hotels[idx]);
-            updateUI();
-        }
-    }
-
-    function buyCurrentTile() {
-        const p = players[turn];
-        const tile = config[p.pos];
-        if(p.money >= tile.pr) {
-            p.money -= tile.pr; 
-            p.props.push(p.pos);
-            // ORDENAR PROPIEDADES POR ID (POSICIÓN EN TABLERO)
-            p.props.sort((a, b) => a - b);
-            addLog(`${p.name} compró ${tile.n}`);
-            document.getElementById('buy-btn').style.display = 'none';
-            updateUI();
-        }
-    }
-
-    function finishTurn() {
-        document.getElementById('buy-btn').style.display = 'none';
-        document.getElementById('end-btn').style.display = 'none';
-        document.getElementById('roll-btn').disabled = false;
-        turn = (turn + 1) % players.length;
-        viewingPlayerIndex = turn;
-        updateUI();
-        if(players[turn].isBot) setTimeout(playTurn, 1000);
-    }
-
-    function updateUI() {
-        const pList = document.getElementById('players-list');
-        pList.innerHTML = '';
-        players.forEach((p, i) => {
-            pList.innerHTML += `<div class="p-card ${turn===i?'active':''}" onclick="viewingPlayerIndex=${i};updateUI();"><div style="font-size:9px;">${p.name}</div><b>$${p.money}</b></div>`;
-        });
-        document.getElementById('turn-label').innerText = `Turno: ${players[turn].name}`;
-        renderPropList();
-    }
-
-    function renderPropList() {
-        const p = players[viewingPlayerIndex];
-        const list = document.getElementById('prop-list');
-        list.innerHTML = '';
-        document.getElementById('prop-view-title').innerText = `PROPIEDADES DE ${p.name.toUpperCase()}`;
-        
-        p.props.forEach(pIdx => {
-            const tile = config[pIdx];
-            const canUpgrade = !p.isBot && viewingPlayerIndex === turn && hasMonopoly(p, tile.prov) && hotels[pIdx] < 4;
-            const upgradeCost = Math.floor(tile.pr * 0.8);
-            const canAffordUpgrade = p.money >= upgradeCost;
-
-            const card = document.createElement('div');
-            card.className = 'prop-card'; card.style.borderLeftColor = tile.c;
-            card.onclick = () => card.classList.toggle('expanded');
-            card.innerHTML = `
-                <div style="display:flex; justify-content:space-between;"><b>${tile.n}</b> <span>${"🏨".repeat(hotels[pIdx])}</span></div>
-                <div class="rent-table">
-                    <span>Renta Actual:</span><b>$${tile.r[hotels[pIdx]]}</b>
-                    <span>Mejorar Hotel:</span><b>$${upgradeCost}</b>
-                    ${canUpgrade ? `<button class="btn btn-upgrade" ${!canAffordUpgrade ? 'disabled style="background:#ccc"' : ''} onclick="event.stopPropagation(); upgradeProperty(${pIdx})">${canAffordUpgrade ? '⬆️ CONSTRUIR' : 'SIN FONDOS'}</button>` : ''}
-                </div>`;
-            list.appendChild(card);
-        });
-    }
-
-    function updateTokenPos() {
-        players.forEach((p, i) => {
-            const cell = document.getElementById(`cell-${p.pos}`);
-            const rect = cell.getBoundingClientRect();
-            const t = document.getElementById(`tk-${p.id}`);
-            t.style.left = (rect.left + 4 + (i*6)) + 'px';
-            t.style.top = (rect.top + 4) + 'px';
-        });
-    }
-
-    function addLog(msg) {
-        const l = document.getElementById('log');
-        l.innerHTML = `<div>• ${msg}</div>` + l.innerHTML;
-    }
-
-    window.onresize = updateTokenPos;
-</script>
-</body>
-</html>
+            <button id="buy-btn" class="btn btn-buy" style="display:none;" onclick="buyCurrent
