@@ -2,169 +2,197 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>La China - Cartas Argentinas</title>
+    <title>PolyPoly - El Juego de Propiedades</title>
     <style>
-        /* Volvemos al fondo verde original de tu captura */
-        body {
-            background-color: #0d2f1d; 
-            color: #f1c40f;
-            font-family: 'Georgia', serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            margin: 0;
-            text-align: center;
+        :root {
+            --board-color: #bfdbfe;
+            --cell-border: #1e293b;
+        }
+        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; background: #f1f5f9; }
+        
+        /* Menú Inicial */
+        #menu { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); margin-top: 50px; text-align: center; }
+        
+        /* Tablero */
+        #game-container { display: none; margin-top: 20px; }
+        #board { 
+            display: grid; 
+            grid-template-columns: repeat(6, 80px); 
+            grid-template-rows: repeat(6, 80px); 
+            gap: 2px; background: var(--cell-border); border: 4px solid var(--cell-border);
+        }
+        .cell { 
+            background: white; position: relative; display: flex; 
+            flex-direction: column; align-items: center; justify-content: center; 
+            font-size: 10px; text-align: center; padding: 5px;
+        }
+        .header { height: 15px; width: 100%; position: absolute; top: 0; }
+        
+        /* Fichas */
+        .token { 
+            width: 15px; height: 15px; border-radius: 50%; 
+            display: inline-block; margin: 2px; border: 1px solid black;
         }
 
-        h1 {
-            font-size: 3rem;
-            margin-bottom: 5px;
-            text-shadow: 2px 2px #000;
-        }
-
-        .subtitle {
-            font-size: 1.2rem;
-            color: #fff;
-            margin-bottom: 30px;
-        }
-
-        /* La carta estilo "La China" */
-        .card-container {
-            perspective: 1000px;
-            margin-bottom: 30px;
-        }
-
-        .card {
-            width: 260px;
-            height: 400px;
-            background-color: #f3e5ab; /* Color crema de carta antigua */
-            border: 8px solid #fff;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            display: flex;
-            flex-direction: column;
-            padding: 20px;
-            position: relative;
-            box-sizing: border-box;
-        }
-
-        .card-number {
-            font-size: 2.5rem;
-            font-weight: bold;
-            color: #2c3e50;
-            text-align: left;
-        }
-
-        .card-illustration {
-            flex-grow: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .card-illustration img {
-            max-width: 85%;
-            height: auto;
-            /* Filtro opcional para que se integre con el papel antiguo */
-            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.2));
-        }
-
-        /* Estilo de los botones y contador */
-        .deck-info {
-            background-color: rgba(0,0,0,0.5);
-            padding: 10px 30px;
-            border-radius: 25px;
-            color: #fff;
-            font-size: 1.2rem;
-            margin-bottom: 20px;
-        }
-
-        button {
-            background-color: #d35400; /* Naranja original */
-            color: white;
-            border: none;
-            padding: 15px 40px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            border-radius: 8px;
-            cursor: pointer;
-            text-transform: uppercase;
-            box-shadow: 0 4px #a04000;
-        }
-
-        button:active {
-            box-shadow: 0 2px #a04000;
-            transform: translateY(2px);
-        }
+        /* Controles */
+        #ui { margin-left: 20px; width: 250px; }
+        .log { height: 150px; overflow-y: auto; background: #eee; padding: 10px; font-size: 12px; margin-top: 10px; }
     </style>
 </head>
 <body>
 
-    <h1>LA CHINA</h1>
-    <p class="subtitle">Toca para revelar el destino</p>
+<div id="menu">
+    <h1>PolyPoly</h1>
+    <p>Selecciona número de jugadores:</p>
+    <select id="player-count">
+        <option value="1">1 Jugador vs Servidor</option>
+        <option value="2">2 Jugadores</option>
+        <option value="3">3 Jugadores</option>
+        <option value="4">4 Jugadores</option>
+    </select>
+    <button onclick="startGame()">Empezar Juego</button>
+</div>
 
-    <div class="card-container" onclick="sacarCarta()">
-        <div class="card" id="current-card">
-            <div class="card-number" id="card-val">8</div>
-            <div class="card-illustration">
-                <img src="espada.png" id="card-img" alt="Palo">
+<div id="game-container">
+    <div style="display: flex;">
+        <div id="board">
             </div>
+        
+        <div id="ui">
+            <h3>Turno de: <span id="current-player-name">-</span></h3>
+            <p>Dinero: $<span id="player-money">0</span></p>
+            <button id="roll-btn" onclick="playTurn()">Lanzar Dados</button>
+            <div id="dice-result">🎲: -</div>
+            <div class="log" id="game-log"></div>
         </div>
     </div>
+</div>
 
-    <div class="deck-info">
-        Cartas en el mazo: <span id="deck-count">38</span>
-    </div>
+<script>
+    const boardData = [
+        { name: "SALIDA", color: "gray", price: 0 },
+        { name: "Av. Azul", color: "blue", price: 60 },
+        { name: "ARCA", color: "white", price: 0 },
+        { name: "C. Madrid", color: "blue", price: 80 },
+        { name: "IMPUESTOS", color: "white", price: 200 },
+        { name: "CÁRCEL", color: "gray", price: 0 },
+        { name: "Av. Roja", color: "red", price: 100 },
+        { name: "SUERTE", color: "white", price: 0 },
+        { name: "Av. México", color: "red", price: 120 },
+        { name: "Ferrocarril", color: "black", price: 200 },
+        { name: "PARKING", color: "gray", price: 0 },
+        { name: "Av. Amarilla", color: "yellow", price: 140 },
+        { name: "ELÉCTRICA", color: "white", price: 150 },
+        { name: "Av. Sol", color: "yellow", price: 160 },
+        { name: "VAYA A LA CÁRCEL", color: "gray", price: 0 },
+        { name: "Av. Verde", color: "green", price: 200 },
+        { name: "Av. Paz", color: "green", price: 220 },
+        { name: "SUERTE", color: "white", price: 0 },
+        { name: "Av. Lujo", color: "purple", price: 400 },
+        { name: "SUPER IMPUESTO", color: "white", price: 100 }
+    ];
 
-    <button onclick="mezclarMazo()">MEZCLAR MAZO</button>
+    let players = [];
+    let currentPlayerIndex = 0;
 
-    <script>
-        // Configuración de tus archivos subidos a GitHub
-        const imagenesPalos = {
-            'Espada': 'espada.png',
-            'Oro': 'oro.png',
-            'Copa': 'copa.png',
-            'Basto': 'basto.png'
-        };
+    function startGame() {
+        const count = parseInt(document.getElementById('player-count').value);
+        const colors = ['red', 'blue', 'green', 'gold'];
+        
+        players = [];
+        for(let i=0; i < (count === 1 ? 2 : count); i++) {
+            players.push({
+                id: i,
+                name: i === 1 && count === 1 ? "Servidor" : `Jugador ${i+1}`,
+                isBot: i === 1 && count === 1,
+                position: 0,
+                money: 1500,
+                color: colors[i],
+                properties: []
+            });
+        }
 
-        let mazo = [];
-        const valores = [1, 2, 3, 4, 5, 6, 7, 10, 11, 12];
-        const palos = ['Espada', 'Oro', 'Copa', 'Basto'];
+        document.getElementById('menu').style.display = 'none';
+        document.getElementById('game-container').style.display = 'flex';
+        renderBoard();
+        updateUI();
+    }
 
-        function mezclarMazo() {
-            mazo = [];
-            for (let palo of palos) {
-                for (let valor of valores) {
-                    mazo.push({ valor, palo });
-                }
+    function renderBoard() {
+        const boardEl = document.getElementById('board');
+        boardEl.innerHTML = '';
+        // Simplificación: Solo mostramos las casillas en un orden visual lógico
+        boardData.forEach((cell, i) => {
+            const div = document.createElement('div');
+            div.className = 'cell';
+            div.id = `cell-${i}`;
+            div.innerHTML = `<div class="header" style="background:${cell.color}"></div>
+                             <div>${cell.name}</div>
+                             <div class="tokens-here"></div>`;
+            boardEl.appendChild(div);
+        });
+        placeTokens();
+    }
+
+    function placeTokens() {
+        document.querySelectorAll('.tokens-here').forEach(el => el.innerHTML = '');
+        players.forEach(p => {
+            const container = document.querySelector(`#cell-${p.position} .tokens-here`);
+            const span = document.createElement('span');
+            span.className = 'token';
+            span.style.backgroundColor = p.color;
+            container.appendChild(span);
+        });
+    }
+
+    function playTurn() {
+        const player = players[currentPlayerIndex];
+        const dice = Math.floor(Math.random() * 6) + 1;
+        document.getElementById('dice-result').innerText = `🎲: ${dice}`;
+        
+        // Mover
+        player.position = (player.position + dice) % boardData.length;
+        if (player.position < dice && player.position !== 0) {
+            player.money += 200; // Salario por pasar por salida
+            log(`${player.name} pasó por Salida y cobró $200`);
+        }
+
+        const tile = boardData[player.position];
+        log(`${player.name} cayó en ${tile.name}`);
+
+        // Lógica básica de compra
+        if(tile.price > 0) {
+            if(player.money >= tile.price) {
+                player.money -= tile.price;
+                log(`${player.name} compró ${tile.name} por $${tile.price}`);
             }
-            // Mezcla aleatoria
-            mazo.sort(() => Math.random() - 0.5);
-            actualizarContador();
-            alert("Mazo mezclado");
         }
 
-        function sacarCarta() {
-            if (mazo.length === 0) {
-                alert("¡No hay más cartas! Mezcla el mazo de nuevo.");
-                return;
-            }
+        placeTokens();
+        nextTurn();
+    }
 
-            const carta = mazo.pop();
-            document.getElementById('card-val').innerText = carta.valor;
-            document.getElementById('card-img').src = imagenesPalos[carta.palo];
-            actualizarContador();
+    function nextTurn() {
+        currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
+        updateUI();
+        
+        if(players[currentPlayerIndex].isBot) {
+            log("Turno del Servidor...");
+            setTimeout(playTurn, 1000);
         }
+    }
 
-        function actualizarContador() {
-            document.getElementById('deck-count').innerText = mazo.length;
-        }
+    function updateUI() {
+        const p = players[currentPlayerIndex];
+        document.getElementById('current-player-name').innerText = p.name;
+        document.getElementById('current-player-name').style.color = p.color;
+        document.getElementById('player-money').innerText = p.money;
+    }
 
-        // Inicializar al cargar
-        mezclarMazo();
-    </script>
+    function log(msg) {
+        const logEl = document.getElementById('game-log');
+        logEl.innerHTML = `> ${msg}<br>` + logEl.innerHTML;
+    }
+</script>
 </body>
 </html>
