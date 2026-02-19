@@ -3,151 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ArgenPoly - Messi Edition</title>
+    <title>ArgenPoly - Full Mobile</title>
     <style>
         :root {
             --primary: #FFD93D; --secondary: #6BCB77; --accent: #4D96FF; 
-            --danger: #FF6B6B; --bg: #F9F7F7; --font: 'Segoe UI', sans-serif;
+            --danger: #FF6B6B; --bg: #121212; --card-bg: #1e1e1e;
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         
         body { 
-            font-family: var(--font); background: linear-gradient(135deg, #4D96FF 0%, #6BCB77 100%);
-            margin: 0; padding: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden;
+            font-family: 'Segoe UI', sans-serif; background: var(--bg);
+            margin: 0; padding: 0; height: 100vh; color: white;
+            display: flex; flex-direction: column; overflow: hidden;
         }
 
-        /* MENU INICIAL */
-        #setup-menu {
-            position: fixed; inset: 0; background: rgba(255,255,255,0.98); z-index: 5000;
-            display: flex; flex-direction: column; align-items: center; padding: 20px; overflow-y: auto;
-        }
-        .menu-card {
-            background: white; padding: 25px; border-radius: 30px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.2); width: 100%; max-width: 400px;
-        }
-        .input-group { margin-bottom: 12px; }
-        label { font-size: 11px; font-weight: 900; color: #555; display: block; margin-bottom: 4px; text-transform: uppercase; }
-        input, select { 
-            width: 100%; padding: 12px; border-radius: 12px; border: 2px solid #eee; 
-            font-size: 14px; outline: none;
-        }
-
-        /* JUEGO ESTRUCTURA */
-        #game-container { display: none; flex-direction: column; height: 100vh; }
-
-        #top-section {
-            padding: 10px; display: flex; justify-content: center; align-items: center;
-            background: rgba(255,255,255,0.1); flex-shrink: 0;
-        }
+        /* ESTRUCTURA PRINCIPAL FIX */
+        #top-section { flex-shrink: 0; padding: 10px; display: flex; justify-content: center; }
         #board {
             display: grid; grid-template-columns: repeat(6, 1fr); grid-template-rows: repeat(6, 1fr);
-            gap: 3px; width: 90vw; height: 90vw; max-width: 400px; max-height: 400px;
-            background: #fff; padding: 5px; border-radius: 15px; box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            gap: 2px; width: 92vw; height: 92vw; max-width: 380px; max-height: 380px;
+            background: #333; padding: 4px; border-radius: 12px;
         }
 
-        .cell {
-            background: #fdfdfd; border-radius: 3px; border: 1px solid #eee;
-            position: relative; display: flex; flex-direction: column;
-            align-items: center; justify-content: flex-end; padding: 2px;
-            font-size: 7px; font-weight: 800; text-align: center;
-        }
-        .cell-color { position: absolute; top: 0; width: 100%; height: 30%; border-radius: 2px 2px 0 0; }
-
-        /* PANEL INFERIOR CON SCROLL REPARADO */
         #bottom-section {
-            flex: 1; background: var(--bg); border-radius: 30px 30px 0 0;
+            flex: 1; background: #181818; border-radius: 25px 25px 0 0;
             padding: 15px; display: flex; flex-direction: column;
-            box-shadow: 0 -10px 30px rgba(0,0,0,0.1);
-            overflow-y: scroll; /* Forzamos scroll */
-            -webkit-overflow-scrolling: touch;
+            overflow-y: auto; /* Scroll general del panel */
         }
 
-        .player-chips { display: flex; gap: 8px; margin-bottom: 12px; overflow-x: auto; padding: 5px; flex-shrink: 0; }
-        .p-card {
-            min-width: 120px; padding: 10px; border-radius: 15px; background: white;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.05); border-bottom: 5px solid #ccc; transition: 0.3s;
+        /* COMPONENTES */
+        .cell { background: #222; border-radius: 2px; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; font-size: 7px; padding: 2px; }
+        .cell-color { position: absolute; top: 0; width: 100%; height: 25%; }
+
+        .player-chips { display: flex; gap: 10px; margin-bottom: 10px; flex-shrink: 0; }
+        .p-card { flex: 1; padding: 10px; border-radius: 15px; background: #2a2a2a; border-bottom: 4px solid #444; }
+        .p-card.active { border-bottom-color: var(--accent); background: #333; transform: scale(1.02); }
+
+        #log { background: #000; padding: 8px; border-radius: 10px; height: 50px; font-size: 10px; color: #aaa; margin-bottom: 10px; overflow-y: auto; }
+
+        .btn { width: 100%; padding: 15px; border: none; border-radius: 15px; font-weight: 900; color: white; margin-bottom: 8px; font-size: 14px; }
+        .btn-roll { background: var(--accent); box-shadow: 0 4px #2b6cb0; }
+        .btn-buy { background: var(--secondary); box-shadow: 0 4px #48bb78; }
+
+        /* LISTA DE PROPIEDADES CON FIX DE CORTE */
+        #prop-list {
+            display: flex; flex-direction: column; gap: 10px;
+            max-height: 40vh; /* LIMITAMOS EL ALTO PARA QUE NO SE CORTE */
+            overflow-y: auto; 
+            padding-right: 5px;
         }
-        .p-card.active { transform: translateY(-3px); border-bottom-width: 8px; box-shadow: 0 6px 15px rgba(0,0,0,0.1); }
 
-        .dice-box { grid-column: 2/6; grid-row: 2/6; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        #dice-val { font-size: 40px; }
-
-        .btn {
-            width: 100%; padding: 14px; border: none; border-radius: 15px;
-            font-weight: 900; font-size: 14px; color: white; cursor: pointer;
-            text-transform: uppercase; margin-bottom: 8px; box-shadow: 0 4px 0 rgba(0,0,0,0.1);
-        }
-        .btn-roll { background: var(--accent); }
-        .btn-buy { background: var(--secondary); }
-        .btn-end { background: #adb5bd; }
-
-        /* TARJETAS DE PROPIEDAD CON INFO */
         .prop-card {
-            background: white; border-radius: 15px; padding: 12px; margin-bottom: 10px;
-            border-left: 10px solid #ccc; box-shadow: 0 3px 6px rgba(0,0,0,0.05);
-            cursor: pointer;
+            background: #252525; border-radius: 12px; padding: 12px;
+            border-left: 8px solid #444; transition: 0.3s;
         }
-        .prop-info {
-            max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out;
-            font-size: 11px; color: #666; margin-top: 0;
+        .prop-card.expanded { background: #2d2d2d; }
+        
+        .rent-table {
+            display: none; grid-template-columns: 1fr 1fr; gap: 5px;
+            font-size: 11px; margin-top: 10px; padding-top: 10px; border-top: 1px solid #444;
         }
-        .prop-card.expanded .prop-info { max-height: 100px; margin-top: 8px; border-top: 1px solid #eee; padding-top: 8px; }
+        .prop-card.expanded .rent-table { display: grid; }
 
-        #log {
-            background: #fff; padding: 10px; border-radius: 12px; height: 60px;
-            font-size: 10px; overflow-y: auto; margin-bottom: 12px; border: 1px dashed #ddd; flex-shrink: 0;
-        }
-
-        .token {
-            width: 16px; height: 16px; border-radius: 50%; border: 2px solid white;
-            position: absolute; z-index: 100; transition: all 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-        }
-
-        @media (min-width: 1024px) {
-            #game-container { flex-direction: row; }
-            #top-section { flex: 1.2; height: 100vh; }
-            #bottom-section { flex: 0.8; height: 100vh; border-radius: 0; }
-            #board { width: 35vw; height: 35vw; }
-        }
+        .token { width: 15px; height: 15px; border-radius: 50%; border: 2px solid white; position: absolute; z-index: 100; transition: 0.3s; }
     </style>
 </head>
 <body>
 
-<div id="setup-menu">
-    <div class="menu-card">
-        <h1 style="color: var(--accent); margin:0;">🇦🇷 ARGENPOLY</h1>
-        <p style="font-weight:bold; color: var(--secondary); margin-bottom:20px;">VS MESSI</p>
-        
-        <div class="input-group">
-            <label>Velocidad de las piezas</label>
-            <select id="speed-select">
-                <option value="400">Paseo (Lento)</option>
-                <option value="250" selected>Normal</option>
-                <option value="100">Maratón (Rápido)</option>
-            </select>
-        </div>
-
-        <div class="input-group">
-            <label>Jugadores Reales</label>
-            <select id="player-qty" onchange="generateNameInputs()">
-                <option value="1">1 Jugador vs Messi</option>
-                <option value="2">2 Jugadores vs Messi</option>
-                <option value="3">3 Jugadores vs Messi</option>
-            </select>
-        </div>
-
-        <div id="names-container"></div>
-        <button class="btn btn-roll" onclick="initGame()" style="margin-top:10px;">¡A LA CANCHA!</button>
-    </div>
-</div>
-
-<div id="game-container">
+<div id="game-container" style="display:flex; flex-direction:column; height: 100vh;">
     <div id="top-section">
         <div id="board">
-            <div class="dice-box">
-                <div id="dice-val">🎲</div>
-                <div id="turn-label" style="font-weight:900; color:var(--accent); font-size:10px; margin-top:5px;"></div>
+            <div style="grid-column: 2/6; grid-row: 2/6; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
+                <div id="dice-val" style="font-size: 40px;">🎲</div>
+                <div id="turn-label" style="font-size: 10px; color: var(--accent); font-weight: bold;">TURNO JUGADOR 1</div>
             </div>
         </div>
     </div>
@@ -155,102 +84,82 @@
     <div id="bottom-section">
         <div class="player-chips" id="players-list"></div>
         <div id="log"></div>
+        
         <div id="action-btns">
-            <button id="roll-btn" class="btn btn-roll" onclick="playTurn()">🎲 Lanzar Dados</button>
-            <button id="buy-btn" class="btn btn-buy" style="display:none;" onclick="buyCurrentTile()">💰 Comprar</button>
-            <button id="end-btn" class="btn btn-end" style="display:none;" onclick="finishTurn()">⏭ Pasar Turno</button>
+            <button id="roll-btn" class="btn btn-roll" onclick="playTurn()">🎲 LANZAR DADOS</button>
+            <button id="buy-btn" class="btn btn-buy" style="display:none;" onclick="buyCurrentTile()">💰 COMPRAR PROPIEDAD</button>
+            <button id="end-btn" class="btn" style="display:none; background:#444;" onclick="finishTurn()">⏭ PASAR TURNO</button>
         </div>
-        <h3 style="margin:15px 0 10px; font-size:13px; color:#555; text-transform:uppercase;">Mis Propiedades</h3>
+
+        <h4 style="margin: 10px 0; font-size: 12px; color: #888;">MIS PROPIEDADES (Toca para ver rentas)</h4>
         <div id="prop-list"></div>
-        <div style="height: 50px;"></div>
+        
+        <div style="height: 60px; flex-shrink: 0;"></div>
     </div>
 </div>
 
 <script>
     const config = [
-        { n: "SALIDA", c: "#64748b", pr: 0, r: 0 },
-        { n: "Ushuaia", prov: "TDF", c: "#FF6B6B", pr: 150, r: 50 },
-        { n: "R.Grande", prov: "TDF", c: "#FF6B6B", pr: 180, r: 60 },
-        { n: "R.Gallegos", prov: "SC", c: "#FF9F45", pr: 220, r: 80 },
-        { n: "Calafate", prov: "SC", c: "#FF9F45", pr: 250, r: 100 },
-        { n: "VISITA", c: "#334155", pr: 0, r: 0 },
-        { n: "Rawson", prov: "CH", c: "#F9D923", pr: 300, r: 120 },
-        { n: "Madryn", prov: "CH", c: "#F9D923", pr: 350, r: 150 },
-        { n: "Viedma", prov: "RN", c: "#36AE7C", pr: 400, r: 180 },
-        { n: "Bariloche", prov: "RN", c: "#36AE7C", pr: 450, r: 200 },
-        { n: "SUERTE", c: "#ccc", pr: 0, r: 0 },
-        { n: "Neuquén", prov: "NQ", c: "#187498", pr: 500, r: 250 },
-        { n: "S.M.Andes", prov: "NQ", c: "#187498", pr: 550, r: 280 },
-        { n: "Mendoza", prov: "MZ", c: "#4D96FF", pr: 600, r: 350 },
-        { n: "S.Rafael", prov: "MZ", c: "#4D96FF", pr: 650, r: 400 },
-        { n: "ARCA", c: "#ccc", pr: 0, r: 0 },
-        { n: "Córdoba", prov: "CB", c: "#9C2CF3", pr: 750, r: 500 },
-        { n: "C.Paz", prov: "CB", c: "#9C2CF3", pr: 800, r: 550 },
-        { n: "La Plata", prov: "BA", c: "#EB4747", pr: 1000, r: 800 },
-        { n: "M.Plata", prov: "BA", c: "#EB4747", pr: 1300, r: 1000 }
+        { n: "SALIDA", pr: 0, r: [0,0,0,0], c: "#666" },
+        { n: "Ushuaia", prov: "TDF", c: "#FF6B6B", pr: 150, r: [50, 150, 450, 900] },
+        { n: "R.Grande", prov: "TDF", c: "#FF6B6B", pr: 180, r: [60, 180, 500, 1000] },
+        { n: "R.Gallegos", prov: "SC", c: "#FF9F45", pr: 220, r: [80, 220, 600, 1100] },
+        { n: "Calafate", prov: "SC", c: "#FF9F45", pr: 250, r: [100, 250, 700, 1200] },
+        { n: "VISITA", pr: 0, r: [0,0,0,0], c: "#666" },
+        { n: "Rawson", prov: "CH", c: "#F9D923", pr: 300, r: [120, 300, 800, 1300] },
+        { n: "Madryn", prov: "CH", c: "#F9D923", pr: 350, r: [150, 350, 900, 1400] },
+        { n: "Viedma", prov: "RN", c: "#36AE7C", pr: 400, r: [180, 400, 1000, 1600] },
+        { n: "Bariloche", prov: "RN", c: "#36AE7C", pr: 450, r: [200, 450, 1100, 1800] },
+        { n: "SUERTE", pr: 0, r: [0,0,0,0], c: "#ccc" },
+        { n: "Neuquén", prov: "NQ", c: "#187498", pr: 500, r: [250, 500, 1200, 2000] },
+        { n: "S.M.Andes", prov: "NQ", c: "#187498", pr: 550, r: [280, 550, 1300, 2200] },
+        { n: "Mendoza", prov: "MZ", c: "#4D96FF", pr: 600, r: [350, 700, 1500, 2500] },
+        { n: "S.Rafael", prov: "MZ", c: "#4D96FF", pr: 650, r: [400, 800, 1700, 2800] },
+        { n: "ARCA", pr: 0, r: [0,0,0,0], c: "#ccc" },
+        { n: "Córdoba", prov: "CB", c: "#9C2CF3", pr: 750, r: [500, 1000, 2000, 3500] },
+        { n: "C.Paz", prov: "CB", c: "#9C2CF3", pr: 800, r: [550, 1100, 2200, 4000] },
+        { n: "La Plata", prov: "BA", c: "#EB4747", pr: 1000, r: [800, 1600, 3000, 5000] },
+        { n: "M.Plata", prov: "BA", c: "#EB4747", pr: 1300, r: [1000, 2000, 4000, 6000] }
     ];
 
-    let players = [];
+    let players = [
+        { id: 0, name: "Jugador 1", money: 1750, pos: 0, color: "#4D96FF", props: [] },
+        { id: 1, name: "Messi", money: 2000, pos: 0, color: "#888", props: [], isBot: true }
+    ];
     let turn = 0;
-    let gameSpeed = 250;
-    const pColors = ["#4D96FF", "#FF6B6B", "#6BCB77", "#F9D923"];
-
-    function generateNameInputs() {
-        const qty = parseInt(document.getElementById('player-qty').value);
-        const container = document.getElementById('names-container');
-        container.innerHTML = '';
-        for(let i=0; i < qty; i++) {
-            container.innerHTML += `<div class="input-group"><label>Nombre Jugador ${i+1}</label><input type="text" id="p${i}-name" placeholder="Messi te espera..."></div>`;
-        }
-    }
-
-    function initGame() {
-        const qty = parseInt(document.getElementById('player-qty').value);
-        gameSpeed = parseInt(document.getElementById('speed-select').value);
-        players = [];
-        for(let i=0; i < qty; i++) {
-            players.push({ id: i, name: document.getElementById(`p${i}-name`).value || `Jugador ${i+1}`, money: 2000, pos: 0, color: pColors[i], props: [] });
-        }
-        players.push({ id: players.length, name: "Messi", money: 2000, pos: 0, color: "#888", props: [], isBot: true });
-
-        document.getElementById('setup-menu').style.display = 'none';
-        document.getElementById('game-container').style.display = 'flex';
-        renderBoard();
-        updateUI();
-    }
 
     function renderBoard() {
         const board = document.getElementById('board');
         const posMap = [[5,5],[4,5],[3,5],[2,5],[1,5],[0,5],[0,4],[0,3],[0,2],[0,1],[0,0],[1,0],[2,0],[3,0],[4,0],[5,0],[5,1],[5,2],[5,3],[5,4]];
+        
         config.forEach((d, i) => {
             const cell = document.createElement('div');
             cell.className = 'cell'; cell.id = `cell-${i}`;
             cell.style.gridColumn = posMap[i][0] + 1; cell.style.gridRow = posMap[i][1] + 1;
-            cell.innerHTML = d.pr ? `<div class="cell-color" style="background:${d.c}"></div><span>${d.n}</span><span style="color:#22c55e;font-size:6px" id="b-pr-${i}">$${d.pr}</span>` : `<span>${d.n}</span>`;
+            cell.innerHTML = d.pr ? `<div class="cell-color" style="background:${d.c}"></div><span style="z-index:1">${d.n}</span><span style="color:#6BCB77;font-size:6px">$${d.pr}</span>` : `<span>${d.n}</span>`;
             board.appendChild(cell);
         });
+
         players.forEach(p => {
             const t = document.createElement('div');
             t.className = 'token'; t.id = `tk-${p.id}`; t.style.backgroundColor = p.color;
             document.body.appendChild(t);
         });
-        setTimeout(updateTokenPos, 100);
+        updateTokenPos();
     }
 
     async function playTurn() {
         const p = players[turn];
         document.getElementById('roll-btn').disabled = true;
-        const dice = document.getElementById('dice-val');
         const roll = Math.floor(Math.random() * 6) + 1;
-        dice.innerText = "...";
-        await new Promise(r => setTimeout(r, 400));
-        dice.innerText = ['⚀','⚁','⚂','⚃','⚄','⚅'][roll-1];
+        document.getElementById('dice-val').innerText = "...";
+        await new Promise(r => setTimeout(r, 600));
+        document.getElementById('dice-val').innerText = ['⚀','⚁','⚂','⚃','⚄','⚅'][roll-1];
 
         for(let i=0; i<roll; i++) {
             p.pos = (p.pos + 1) % config.length;
-            if(p.pos === 0) { p.money += 200; addLog("¡$200 de salida!"); }
             updateTokenPos();
-            await new Promise(r => setTimeout(r, gameSpeed));
+            await new Promise(r => setTimeout(r, 200));
         }
         handleLanding(p);
     }
@@ -258,19 +167,20 @@
     function handleLanding(p) {
         const tile = config[p.pos];
         const owner = players.find(x => x.props.includes(tile.n));
+        
         if(owner && owner !== p) {
-            p.money -= tile.r; owner.money += tile.r;
-            addLog(`Pagaste $${tile.r} a ${owner.name}`);
+            const rent = tile.r[0]; // Renta base
+            p.money -= rent; owner.money += rent;
+            addLog(`${p.name} pagó $${rent} a ${owner.name}`);
         } else if(!owner && tile.pr) {
             if(p.isBot) {
                 if(p.money > tile.pr + 500) buyCurrentTile();
+                else setTimeout(finishTurn, 1000);
             } else {
                 document.getElementById('buy-btn').style.display = 'block';
-                document.getElementById('buy-btn').innerText = `💰 COMPRAR POR $${tile.pr}`;
             }
         }
         if(!p.isBot) document.getElementById('end-btn').style.display = 'block';
-        else setTimeout(finishTurn, 1000);
         updateUI();
     }
 
@@ -278,9 +188,9 @@
         const p = players[turn];
         const tile = config[p.pos];
         if(p.money >= tile.pr) {
-            p.money -= tile.pr; p.props.push(tile.n);
-            addLog(`Adquiriste ${tile.n}`);
-            document.getElementById(`b-pr-${p.pos}`).innerText = "MÍO";
+            p.money -= tile.pr;
+            p.props.push(tile.n);
+            addLog(`${p.name} compró ${tile.n}`);
             document.getElementById('buy-btn').style.display = 'none';
             updateUI();
         }
@@ -300,10 +210,9 @@
         pList.innerHTML = '';
         players.forEach((p, i) => {
             pList.innerHTML += `
-                <div class="p-card ${turn===i?'active':''}" style="border-bottom-color:${p.color}">
-                    <div style="font-size:9px; font-weight:900; color:#888;">${p.name==='Messi'?'D.O.S':'JUGADOR'}</div>
-                    <div style="font-size:14px; font-weight:900;">${p.name}</div>
-                    <div style="color:var(--secondary); font-weight:900;">$${p.money}</div>
+                <div class="p-card ${turn===i?'active':''}">
+                    <div style="font-size:12px; font-weight:bold; color:${p.color}">${p.name}</div>
+                    <div style="font-size:16px; font-weight:900;">$${p.money}</div>
                 </div>`;
         });
 
@@ -311,22 +220,22 @@
 
         const propList = document.getElementById('prop-list');
         propList.innerHTML = '';
-        config.filter(c => players[turn].props.includes(c.n)).forEach(tile => {
+        players[turn].props.forEach(propName => {
+            const tile = config.find(c => c.n === propName);
             const card = document.createElement('div');
             card.className = 'prop-card';
             card.style.borderLeftColor = tile.c;
             card.onclick = () => card.classList.toggle('expanded');
             card.innerHTML = `
-                <div style="font-weight:900; display:flex; justify-content:space-between;">
-                    <span>${tile.n}</span>
-                    <span style="color:var(--secondary)">$${tile.r}</span>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <b>${tile.n}</b>
+                    <span style="color:var(--secondary); font-weight:900;">$${tile.r[0]}</span>
                 </div>
-                <div class="prop-info">
-                    Provincia: ${tile.prov}<br>
-                    Costo original: $${tile.pr}<br>
-                    Valor de venta: $${tile.pr/2}<br>
-                    <button class="btn" style="background:var(--danger); padding:5px; font-size:10px; margin-top:8px;" 
-                            onclick="event.stopPropagation(); sellProp('${tile.n}')">VENDER AHORA</button>
+                <div class="rent-table">
+                    <span>🏠 1 Hotel:</span> <b>$${tile.r[1]}</b>
+                    <span>🏠 2 Hoteles:</span> <b>$${tile.r[2]}</b>
+                    <span>🏠 3 Hoteles:</span> <b>$${tile.r[3]}</b>
+                    <button class="btn" style="grid-column: span 2; background:var(--danger); padding:5px; margin:0; font-size:10px;" onclick="sellProp('${tile.n}')">VENDER POR $${tile.pr/2}</button>
                 </div>
             `;
             propList.appendChild(card);
@@ -334,7 +243,6 @@
     }
 
     function sellProp(name) {
-        if(!confirm("¿Vender?")) return;
         const p = players[turn];
         const tile = config.find(c => c.n === name);
         p.money += (tile.pr / 2);
@@ -347,19 +255,18 @@
             const t = document.getElementById(`tk-${p.id}`);
             const cell = document.getElementById(`cell-${p.pos}`);
             const rect = cell.getBoundingClientRect();
-            t.style.left = (rect.left + 5 + (i*3)) + 'px';
-            t.style.top = (rect.top + 5) + 'px';
+            t.style.left = (rect.left + 8 + (i*3)) + 'px';
+            t.style.top = (rect.top + 8) + 'px';
         });
     }
 
     function addLog(msg) {
         const l = document.getElementById('log');
         l.innerHTML = `<div>• ${msg}</div>` + l.innerHTML;
-        l.scrollTop = 0;
     }
 
+    window.onload = renderBoard;
     window.onresize = updateTokenPos;
-    generateNameInputs();
 </script>
 </body>
 </html>
