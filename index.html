@@ -2,290 +2,367 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>ArgenPoly - El Juego de las Provincias</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ArgenPoly 2.0</title>
     <style>
         :root {
-            --bg-color: #f0f4f8;
-            --accent: #0081C9;
+            --bg: #eef2f7;
+            --panel: #ffffff;
+            --primary: #0081C9;
+            --accent: #FFB100;
+            --text: #2c3e50;
         }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg-color); display: flex; flex-direction: column; align-items: center; margin: 0; }
-        
-        #game-layout { display: flex; gap: 40px; padding: 20px; align-items: flex-start; }
 
-        /* TABLERO CIRCULAR */
-        #board-container {
-            position: relative;
-            width: 600px;
-            height: 600px;
-            border-radius: 50%;
-            background: white;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            border: 15px solid #333;
+        body { 
+            font-family: 'Segoe UI', Roboto, sans-serif; 
+            background: var(--bg); 
+            color: var(--text);
+            margin: 0; 
+            height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
+            overflow: hidden;
+        }
+
+        /* Contenedor Principal */
+        #main-app {
+            display: flex;
+            width: 95vw;
+            height: 90vh;
+            background: var(--panel);
+            border-radius: 24px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+            padding: 20px;
+            gap: 20px;
+        }
+
+        /* Sección Izquierda: Jugadores */
+        #side-players {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .player-card {
+            padding: 15px;
+            border-radius: 15px;
+            background: #f8fafc;
+            border-left: 8px solid #ccc;
+            transition: all 0.3s;
+        }
+
+        .player-card.active {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            background: white;
+        }
+
+        /* Sección Central: Tablero */
+        #board-viewport {
+            flex: 2;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: radial-gradient(circle, #ffffff 0%, #dbeafe 100%);
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        #board-circle {
+            position: relative;
+            width: 500px;
+            height: 500px;
+            border-radius: 50%;
+            border: 10px solid #334155;
         }
 
         .cell {
             position: absolute;
-            width: 90px;
-            height: 100px;
-            text-align: center;
-            font-size: 11px;
-            font-weight: bold;
+            width: 70px;
+            height: 80px;
+            background: white;
+            border: 1px solid #cbd5e1;
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            transform-origin: 50% 300px; /* Punto de rotación en el centro del tablero */
+            align-items: center;
+            justify-content: flex-start;
+            font-size: 9px;
+            font-weight: bold;
+            transform-origin: center 250px;
         }
 
-        .cell-header { height: 15px; width: 100%; border-radius: 5px 5px 0 0; margin-bottom: 2px; }
-        .price-tag { color: #2e7d32; font-size: 10px; }
+        .cell-color { height: 12px; width: 100%; margin-bottom: 4px; }
 
-        /* FICHAS */
-        .token-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 2px; }
-        .token { width: 14px; height: 14px; border-radius: 50%; border: 1px solid #000; box-shadow: 1px 1px 2px rgba(0,0,0,0.5); }
+        /* Sección Derecha: Controles */
+        #side-controls {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
 
-        /* CARTA DE PROPIEDAD */
-        #property-card {
+        .btn-roll {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 20px;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #005a8d;
+        }
+
+        .btn-roll:active { transform: translateY(2px); box-shadow: 0 2px 0 #005a8d; }
+
+        .game-log {
+            flex-grow: 1;
+            background: #1e293b;
+            color: #38bdf8;
+            padding: 15px;
+            border-radius: 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            overflow-y: auto;
+        }
+
+        /* Fichas y Cartas */
+        .token {
+            width: 14px; height: 14px; border-radius: 50%;
+            border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        #property-pop {
             position: absolute;
-            width: 150px;
-            background: white;
-            border: 2px solid #333;
-            border-radius: 8px;
+            width: 140px;
             padding: 10px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            z-index: 1000;
             display: none;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            z-index: 100;
-            animation: fadeIn 0.3s;
+            text-align: center;
+            border: 2px solid gold;
+            animation: bounce 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        @keyframes fadeIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
 
-        /* UI LATERAL */
-        #controls { width: 300px; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .log { height: 250px; overflow-y: auto; background: #222; color: #0f0; padding: 10px; font-family: monospace; font-size: 12px; margin-top: 15px; border-radius: 5px; }
-        button { background: var(--accent); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; width: 100%; font-size: 16px; font-weight: bold; }
-        button:disabled { background: #ccc; }
+        @keyframes bounce { from { transform: scale(0); } to { transform: scale(1); } }
 
-        #menu { margin-top: 100px; text-align: center; background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        #dice-view { font-size: 3rem; margin: 10px 0; }
+
+        /* Pantalla Inicio */
+        #overlay {
+            position: fixed; inset: 0; background: var(--primary);
+            z-index: 2000; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; color: white;
+        }
     </style>
 </head>
 <body>
 
-<div id="menu">
-    <h1>🇦🇷 ArgenPoly</h1>
-    <p>Selecciona jugadores para iniciar el viaje por Argentina</p>
-    <select id="player-count" style="padding: 10px; margin-bottom: 20px; width: 200px;">
-        <option value="1">1 Jugador vs Servidor</option>
-        <option value="2">2 Jugadores</option>
-        <option value="3">3 Jugadores</option>
-        <option value="4">4 Jugadores</option>
-    </select><br>
-    <button onclick="startGame()">INICIAR PARTIDA</button>
+<div id="overlay">
+    <h1 style="font-size: 4rem; margin-bottom: 0;">ARGENPOLY</h1>
+    <p>El viaje financiero por Argentina</p>
+    <div style="background: white; padding: 30px; border-radius: 20px; color: #333; text-align: center;">
+        <h3>¿Cuántos viajan?</h3>
+        <select id="p-count" style="padding: 10px; font-size: 1.1rem; width: 100%;">
+            <option value="1">Tú vs Servidor</option>
+            <option value="2">2 Jugadores</option>
+            <option value="3">3 Jugadores</option>
+            <option value="4">4 Jugadores</option>
+        </select>
+        <button onclick="initGame()" class="btn-roll" style="margin-top: 20px; width: 100%;">EMPEZAR</button>
+    </div>
 </div>
 
-<div id="game-layout" style="display:none;">
-    <div id="board-container">
-        <div id="center-logo">
-            <h2 style="margin:0; color:#0081C9;">ARGEN</h2>
-            <h2 style="margin:0; color:#EEB211;">POLY</h2>
-            <div id="dice-display" style="font-size: 40px; margin-top:10px;">🎲</div>
-        </div>
-        <div id="property-card"></div>
+<div id="main-app">
+    <div id="side-players">
+        <h2 style="margin: 0 0 10px 0;">Viajeros</h2>
+        <div id="players-list"></div>
     </div>
 
-    <div id="controls">
-        <h2 id="current-player-display">Turno de: -</h2>
-        <p>Presupuesto: <b id="money-display">$0</b></p>
-        <button id="roll-btn" onclick="playTurn()">Lanzar Dados</button>
-        <div class="log" id="game-log"></div>
+    <div id="board-viewport">
+        <div id="property-pop"></div>
+        <div id="board-circle">
+            <div style="position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; pointer-events: none;">
+                <span style="font-size: 1.2rem; font-weight: 900; color: #64748b;">ARGENPOLY</span>
+                <div id="dice-view">🎲</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="side-controls">
+        <div id="turn-info" style="text-align: center;">
+            <p style="margin: 0; color: #64748b;">Es el turno de:</p>
+            <h2 id="active-p-name" style="margin: 5px 0;">-</h2>
+        </div>
+        <button id="roll-btn" class="btn-roll" onclick="handleTurn()">LANZAR DADOS</button>
+        <div class="game-log" id="log"></div>
     </div>
 </div>
 
 <script>
-    // Configuración de ciudades por provincias (colores)
-    // El precio escala según la posición (más lejos de Salida, más caro)
-    const cities = [
-        { name: "SALIDA", color: "#ccc", type: "special" },
-        { name: "Rawson", prov: "Chubut", color: "#9c27b0" },
-        { name: "Puerto Madryn", prov: "Chubut", color: "#9c27b0" },
-        { name: "Viedma", prov: "Río Negro", color: "#3f51b5" },
-        { name: "Bariloche", prov: "Río Negro", color: "#3f51b5" },
-        { name: "Neuquén", prov: "Neuquén", color: "#03a9f4" },
-        { name: "San Martín de los Andes", prov: "Neuquén", color: "#03a9f4" },
-        { name: "ARCA", color: "#eee", type: "special" },
-        { name: "Mendoza", prov: "Mendoza", color: "#4caf50" },
-        { name: "San Rafael", prov: "Mendoza", color: "#4caf50" },
-        { name: "Córdoba", prov: "Córdoba", color: "#ffeb3b" },
-        { name: "Villa Carlos Paz", prov: "Córdoba", color: "#ffeb3b" },
-        { name: "Rosario", prov: "Santa Fe", color: "#ff9800" },
-        { name: "Santa Fe", prov: "Santa Fe", color: "#ff9800" },
-        { name: "CÁRCEL", color: "#333", type: "special" },
-        { name: "Mar del Plata", prov: "Buenos Aires", color: "#f44336" },
-        { name: "La Plata", prov: "Buenos Aires", color: "#f44336" },
-        { name: "CABA", prov: "Capital", color: "#b71c1c" }
+    const config = [
+        { n: "SALIDA", c: "#94a3b8", type: "start" },
+        { n: "Ushuaia", p: "T. del Fuego", c: "#f87171", pr: 150 },
+        { n: "Río Gallegos", p: "Santa Cruz", c: "#f87171", pr: 180 },
+        { n: "Rawson", p: "Chubut", c: "#fb923c", pr: 220 },
+        { n: "Puerto Madryn", p: "Chubut", c: "#fb923c", pr: 250 },
+        { n: "SUERTE", c: "#fff", type: "luck" },
+        { n: "Neuquén", p: "Neuquén", c: "#fbbf24", pr: 300 },
+        { n: "Mendoza", p: "Mendoza", c: "#facc15", pr: 350 },
+        { n: "San Rafael", p: "Mendoza", c: "#facc15", pr: 380 },
+        { n: "ARCA", c: "#fff", type: "chest" },
+        { n: "Córdoba", p: "Córdoba", c: "#4ade80", pr: 450 },
+        { n: "Carlos Paz", p: "Córdoba", c: "#4ade80", pr: 480 },
+        { n: "Santa Fe", p: "Santa Fe", c: "#2dd4bf", pr: 520 },
+        { n: "Rosario", p: "Santa Fe", c: "#2dd4bf", pr: 550 },
+        { n: "CÁRCEL", c: "#1e293b", type: "jail" },
+        { n: "Mar del Plata", p: "Bs As", c: "#60a5fa", pr: 650 },
+        { n: "La Plata", p: "Bs As", c: "#60a5fa", pr: 700 },
+        { n: "CABA", p: "Capital", c: "#818cf8", pr: 1000 }
     ];
 
-    // Calcular precios automáticamente basados en la posición
-    cities.forEach((c, i) => {
-        if(!c.type) {
-            c.price = 100 + (i * 40);
-            c.rent = Math.floor(c.price * 0.25); // El arancel es 25% del valor
-        }
-    });
-
     let players = [];
-    let currentPlayerIndex = 0;
+    let turn = 0;
 
-    function startGame() {
-        const count = parseInt(document.getElementById('player-count').value);
-        const colors = ['#e74c3c', '#3498db', '#2ecc71', '#f1c40f'];
+    function initGame() {
+        const count = parseInt(document.getElementById('p-count').value);
+        const colors = ['#ef4444', '#3b82f6', '#10b981', '#f59e0b'];
         
         players = [];
-        const realPlayerCount = count === 1 ? 2 : count;
-        
-        for(let i=0; i < realPlayerCount; i++) {
+        const total = count === 1 ? 2 : count;
+        for(let i=0; i<total; i++) {
             players.push({
-                name: i === 1 && count === 1 ? "Servidor" : `Jugador ${i+1}`,
-                isBot: i === 1 && count === 1,
-                pos: 0,
+                name: (i===1 && count===1) ? "Servidor" : `Jugador ${i+1}`,
                 money: 2000,
+                pos: 0,
                 color: colors[i],
-                owned: []
+                isBot: (i===1 && count===1),
+                props: []
             });
         }
 
-        document.getElementById('menu').style.display = 'none';
-        document.getElementById('game-layout').style.display = 'flex';
-        renderCircularBoard();
+        document.getElementById('overlay').style.display = 'none';
+        renderBoard();
         updateUI();
     }
 
-    function renderCircularBoard() {
-        const container = document.getElementById('board-container');
-        const total = cities.length;
-        const radius = 250;
-
-        cities.forEach((city, i) => {
-            const angle = (i / total) * (Math.PI * 2);
-            const x = Math.cos(angle) * radius;
-            const y = Math.sin(angle) * radius;
-
-            const div = document.createElement('div');
-            div.className = 'cell';
-            div.style.left = `calc(50% + ${x}px - 45px)`;
-            div.style.top = `calc(50% + ${y}px - 50px)`;
+    function renderBoard() {
+        const board = document.getElementById('board-circle');
+        config.forEach((city, i) => {
+            const angle = (i / config.length) * (Math.PI * 2);
+            const el = document.createElement('div');
+            el.className = 'cell';
+            el.style.transform = `rotate(${angle}rad)`;
             
-            // Rotar la casilla para que apunte al centro
-            const rotation = (angle * 180 / Math.PI) + 90;
-            div.style.transform = `rotate(${rotation}deg)`;
-
-            div.innerHTML = `
-                <div class="cell-header" style="background:${city.color}"></div>
-                <div>${city.name}</div>
-                ${city.price ? `<div class="price-tag">$${city.price}</div>` : ''}
-                <div id="token-slot-${i}" class="token-container"></div>
+            el.innerHTML = `
+                <div class="cell-color" style="background:${city.c}"></div>
+                <div style="padding: 2px">${city.n}</div>
+                ${city.pr ? `<div style="color:#16a34a">$${city.pr}</div>` : ''}
+                <div id="slot-${i}" style="display:flex; gap:2px; margin-top:auto; padding-bottom:5px"></div>
             `;
-            container.appendChild(div);
+            board.appendChild(el);
         });
         updateTokens();
     }
 
-    function playTurn() {
-        const p = players[currentPlayerIndex];
+    function handleTurn() {
+        const p = players[turn];
         const dice = Math.floor(Math.random() * 6) + 1;
-        document.getElementById('dice-display').innerText = getDiceEmoji(dice);
+        document.getElementById('dice-view').innerText = ['⚀','⚁','⚂','⚃','⚄','⚅'][dice-1];
         
-        p.pos = (p.pos + dice) % cities.length;
-        const city = cities[p.pos];
+        p.pos = (p.pos + dice) % config.length;
+        const city = config[p.pos];
         
-        log(`${p.name} saca ${dice} y cae en ${city.name}`);
-        
-        if (city.price) {
-            handleProperty(p, city);
+        addLog(`${p.name} caminó hasta ${city.n}`);
+
+        if(city.pr) {
+            const owner = players.find(x => x.props.includes(city.n));
+            if(owner && owner !== p) {
+                const rent = Math.floor(city.pr * 0.3);
+                p.money -= rent;
+                owner.money += rent;
+                addLog(`Pago de arancel: $${rent} a ${owner.name}`);
+            } else if(!owner && p.money >= city.pr) {
+                p.money -= city.pr;
+                p.props.push(city.n);
+                showPropCard(city, p);
+                addLog(`${p.name} compró la propiedad.`);
+            }
+        } else if(city.type === "start") {
+            p.money += 200;
+            addLog("¡Bonus de salida! +$200");
         }
 
         updateTokens();
-        
-        // Cambiar turno
-        currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
-        
-        if(players[currentPlayerIndex].isBot) {
+        turn = (turn + 1) % players.length;
+        updateUI();
+
+        if(players[turn].isBot) {
             document.getElementById('roll-btn').disabled = true;
             setTimeout(() => {
-                playTurn();
+                handleTurn();
                 document.getElementById('roll-btn').disabled = false;
-            }, 1500);
-        }
-        updateUI();
-    }
-
-    function handleProperty(p, city) {
-        const owner = players.find(player => player.owned.includes(city.name));
-        
-        if (owner) {
-            if (owner !== p) {
-                p.money -= city.rent;
-                owner.money += city.rent;
-                log(`${p.name} pagó $${city.rent} de arancel a ${owner.name}`);
-            }
-        } else {
-            if (p.money >= city.price) {
-                p.money -= city.price;
-                p.owned.push(city.name);
-                log(`${p.name} compró ${city.name} por $${city.price}`);
-                showCard(city, p);
-            }
+            }, 1200);
         }
     }
 
-    function showCard(city, player) {
-        const card = document.getElementById('property-card');
-        card.style.display = 'block';
-        card.style.borderColor = city.color;
-        card.innerHTML = `
-            <div style="background:${city.color}; color:white; padding:5px; margin:-10px -10px 10px -10px; border-radius:5px 5px 0 0">
-                TÍTULO DE PROPIEDAD
-            </div>
-            <b>${city.name}</b><br>
-            Prov: ${city.prov}<br><hr>
-            Arancel: $${city.rent}<br>
-            <small>Dueño: ${player.name}</small>
+    function showPropCard(city, p) {
+        const pop = document.getElementById('property-pop');
+        pop.style.display = 'block';
+        pop.style.borderTop = `8px solid ${city.c}`;
+        pop.innerHTML = `
+            <small>ADQUIRIDO</small>
+            <h4 style="margin:5px 0">${city.n}</h4>
+            <p style="font-size:12px; margin:0">Arancel: $${Math.floor(city.pr*0.3)}</p>
         `;
+        setTimeout(() => pop.style.display = 'none', 2000);
+    }
 
-        // Posicionar la carta cerca del jugador
-        const cell = document.querySelectorAll('.cell')[player.pos];
-        card.style.left = cell.style.left;
-        card.style.top = cell.style.top;
+    function updateUI() {
+        const list = document.getElementById('players-list');
+        list.innerHTML = '';
+        players.forEach((p, i) => {
+            const div = document.createElement('div');
+            div.className = `player-card ${turn === i ? 'active' : ''}`;
+            div.style.borderLeftColor = p.color;
+            div.innerHTML = `
+                <div style="display:flex; justify-content:space-between">
+                    <b>${p.name}</b>
+                    <span style="color:#16a34a; font-weight:bold">$${p.money}</span>
+                </div>
+                <small>${p.props.length} Propiedades</small>
+            `;
+            list.appendChild(div);
+        });
 
-        setTimeout(() => { card.style.display = 'none'; }, 3000);
+        const active = players[turn];
+        document.getElementById('active-p-name').innerText = active.name;
+        document.getElementById('active-p-name').style.color = active.color;
     }
 
     function updateTokens() {
-        document.querySelectorAll('.token-container').forEach(c => c.innerHTML = '');
-        players.forEach(p => {
-            const slot = document.getElementById(`token-slot-${p.pos}`);
+        players.forEach((p, i) => {
+            document.querySelectorAll(`[id^="slot-"]`).forEach(s => {
+                const t = s.querySelector(`[data-p="${i}"]`);
+                if(t) t.remove();
+            });
+            const slot = document.getElementById(`slot-${p.pos}`);
             const t = document.createElement('div');
             t.className = 'token';
+            t.dataset.p = i;
             t.style.backgroundColor = p.color;
             slot.appendChild(t);
         });
     }
 
-    function updateUI() {
-        const p = players[currentPlayerIndex];
-        document.getElementById('current-player-display').innerText = `Turno de: ${p.name}`;
-        document.getElementById('current-player-display').style.color = p.color;
-        document.getElementById('money-display').innerText = `$${p.money}`;
-    }
-
-    function log(m) {
-        const l = document.getElementById('game-log');
-        l.innerHTML = `> ${m}<br>${l.innerHTML}`;
-    }
-
-    function getDiceEmoji(n) {
-        return ['🎲', '⚀', '⚁', '⚂', '⚃', '⚄', '⚅'][n];
+    function addLog(msg) {
+        const log = document.getElementById('log');
+        log.innerHTML = `<div>> ${msg}</div>` + log.innerHTML;
     }
 </script>
 
