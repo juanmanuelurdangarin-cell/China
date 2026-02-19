@@ -3,38 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ArgenPoly Deluxe</title>
+    <title>ArgenPoly Deluxe - Edición Hoteles</title>
     <style>
         :root {
-            --bg: #1a1a2e;
-            --board-bg: #e2e8f0;
+            --bg: #0f172a;
+            --board-bg: #f1f5f9;
             --panel: #ffffff;
             --primary: #0081C9;
-            --accent: #FFB100;
+            --accent: #f59e0b;
         }
 
         body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', system-ui, sans-serif;
             background: var(--bg);
             margin: 0;
             height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            color: #333;
+            color: #1e293b;
         }
 
         #game-container {
             display: grid;
-            grid-template-columns: 280px 600px 320px;
-            gap: 20px;
-            background: rgba(255,255,255,0.1);
+            grid-template-columns: 260px 600px 340px;
+            gap: 15px;
+            background: rgba(255,255,255,0.05);
             padding: 20px;
-            border-radius: 20px;
+            border-radius: 24px;
             backdrop-filter: blur(10px);
+            height: 650px;
         }
 
-        /* TABLERO CUADRADO */
+        /* TABLERO */
         #board {
             width: 600px;
             height: 600px;
@@ -44,25 +45,24 @@
             grid-template-rows: repeat(6, 1fr);
             gap: 4px;
             padding: 4px;
-            border-radius: 8px;
+            border-radius: 12px;
             position: relative;
         }
 
         .center-space {
             grid-column: 2 / 6;
             grid-row: 2 / 6;
-            background: #f8fafc;
+            background: white;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            border-radius: 4px;
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.05);
+            border-radius: 8px;
+            box-shadow: inset 0 0 30px rgba(0,0,0,0.05);
         }
 
         .cell {
             background: white;
-            border-radius: 2px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -70,224 +70,214 @@
             padding: 5px;
             font-size: 10px;
             font-weight: bold;
-            text-align: center;
             position: relative;
+            overflow: hidden;
         }
 
-        .cell-color {
-            height: 15px;
-            width: 100%;
+        .cell-color { height: 12px; width: 100%; position: absolute; top: 0; }
+        
+        .hotel-icon {
             position: absolute;
-            top: 0;
+            bottom: 2px;
+            right: 2px;
+            font-size: 16px;
+            filter: drop-shadow(0 0 2px rgba(0,0,0,0.2));
         }
+
+        .has-hotel { background: #fffbeb; border: 1px solid var(--accent); }
 
         /* FICHAS */
         .token {
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            border: 2px solid white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-            position: absolute;
-            transition: all 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28);
-            z-index: 10;
+            width: 18px; height: 18px; border-radius: 50%;
+            border: 2px solid white; position: absolute;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 50; box-shadow: 0 4px 6px rgba(0,0,0,0.3);
         }
 
-        /* DADO ANIMADO */
-        #dice {
-            width: 60px;
-            height: 60px;
-            background: white;
-            border-radius: 12px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 35px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            margin-bottom: 20px;
-            transition: transform 0.5s;
-        }
-
-        .rolling { animation: roll 0.1s infinite; }
-        @keyframes roll {
-            0% { transform: rotate(0deg) scale(1.1); }
-            100% { transform: rotate(360deg) scale(1.1); }
-        }
-
-        /* PANELES LATERALES */
+        /* PANELES */
         .side-panel {
             background: var(--panel);
-            border-radius: 15px;
+            border-radius: 18px;
             padding: 15px;
             display: flex;
             flex-direction: column;
+            max-height: 100%;
         }
-
-        .player-info {
-            padding: 10px;
-            margin-bottom: 10px;
-            border-radius: 10px;
-            border-left: 6px solid #ccc;
-            background: #f1f5f9;
-        }
-
-        .player-info.active { border-left-width: 12px; background: white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
 
         #log {
-            flex-grow: 1;
+            height: 180px; /* Tamaño fijo */
             background: #1e293b;
             color: #38bdf8;
-            padding: 10px;
-            font-family: monospace;
+            padding: 12px;
+            font-family: 'Consolas', monospace;
             font-size: 11px;
             border-radius: 8px;
+            overflow-y: scroll; /* Barra siempre activa */
+            margin-top: 10px;
+        }
+
+        #cards-container {
+            flex-grow: 1;
             overflow-y: auto;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+            margin-top: 10px;
         }
 
         .property-card {
-            background: white;
-            border: 1px solid #ddd;
-            margin-top: 5px;
-            padding: 5px;
-            font-size: 10px;
-            border-radius: 4px;
+            border: 1px solid #e2e8f0;
+            padding: 8px;
+            border-radius: 8px;
+            background: #f8fafc;
+            position: relative;
         }
 
-        button {
+        .btn-hotel {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 9px;
+            cursor: pointer;
+            margin-top: 5px;
+        }
+
+        button#roll-btn {
             background: var(--primary);
             color: white;
             border: none;
-            padding: 15px;
-            border-radius: 8px;
+            padding: 15px 30px;
+            border-radius: 12px;
+            font-size: 1.1rem;
             font-weight: bold;
             cursor: pointer;
-            width: 100%;
+            transition: 0.2s;
         }
 
-        button:disabled { background: #cbd5e1; }
+        button#roll-btn:disabled { background: #94a3b8; cursor: not-allowed; }
+
+        .player-info {
+            padding: 12px;
+            margin-bottom: 8px;
+            border-radius: 12px;
+            background: #f1f5f9;
+            border-left: 6px solid #cbd5e1;
+        }
+        .player-info.active { border-left-color: var(--primary); background: #e0f2fe; }
     </style>
 </head>
 <body>
 
 <div id="game-container">
     <div class="side-panel">
-        <h3 style="margin: 0 0 15px 0">Viajeros</h3>
-        <div id="players-list"></div>
+        <h3 style="margin:0">Viajeros</h3>
+        <div id="players-list" style="margin-top:15px"></div>
     </div>
 
     <div id="board">
         <div class="center-space">
-            <h2 style="color: var(--primary); margin: 0">ARGENPOLY</h2>
-            <div id="dice">⚀</div>
+            <h1 style="color:var(--primary); margin:0; font-size:2.5rem">ARGENPOLY</h1>
+            <div id="dice" style="font-size:50px; margin:20px">⚀</div>
             <button id="roll-btn" onclick="startTurn()">LANZAR DADOS</button>
         </div>
-        </div>
+    </div>
 
     <div class="side-panel">
-        <h3 style="margin: 0 0 10px 0">Historial</h3>
+        <h3 style="margin:0">Movimientos</h3>
         <div id="log"></div>
-        <div id="owned-properties" style="margin-top:15px">
-            <h4 style="margin: 5px 0">Tus Títulos</h4>
-            <div id="cards-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;"></div>
-        </div>
+        
+        <h3 style="margin:15px 0 5px 0">Tus Propiedades</h3>
+        <div id="cards-container"></div>
     </div>
 </div>
 
 <script>
     const boardData = [
-        { n: "SALIDA", c: "#94a3b8", type: "start", x:0, y:0 },
-        { n: "Ushuaia", c: "#f87171", pr: 150, rent: 40 },
-        { n: "R. Gallegos", c: "#f87171", pr: 180, rent: 50 },
-        { n: "Viedma", c: "#fb923c", pr: 220, rent: 60 },
-        { n: "Rawson", c: "#fb923c", pr: 250, rent: 70 },
-        { n: "CÁRCEL", c: "#334155", type: "jail" }, // Esquina 1
-        { n: "Neuquén", c: "#facc15", pr: 300, rent: 85 },
-        { n: "Mendoza", c: "#facc15", pr: 350, rent: 100 },
-        { n: "San Juan", c: "#4ade80", pr: 400, rent: 120 },
-        { n: "La Rioja", c: "#4ade80", pr: 450, rent: 140 },
-        { n: "ARCA", c: "#fff", type: "special" }, // Esquina 2
-        { n: "Catamarca", c: "#2dd4bf", pr: 500, rent: 160 },
-        { n: "Tucumán", c: "#2dd4bf", pr: 550, rent: 180 },
-        { n: "Salta", c: "#60a5fa", pr: 600, rent: 200 },
-        { n: "Jujuy", c: "#60a5fa", pr: 650, rent: 220 },
-        { n: "PARKING", c: "#334155", type: "special" }, // Esquina 3
-        { n: "Córdoba", c: "#818cf8", pr: 750, rent: 280 },
-        { n: "Rosario", c: "#818cf8", pr: 800, rent: 300 },
-        { n: "La Plata", c: "#f472b6", pr: 900, rent: 400 },
-        { n: "CABA", c: "#f472b6", pr: 1200, rent: 600 }
+        { n: "SALIDA", c: "#64748b", type: "start" },
+        { n: "Ushuaia", c: "#ef4444", pr: 150, rent: 50, colorId: "red" },
+        { n: "R. Gallegos", c: "#ef4444", pr: 180, rent: 60, colorId: "red" },
+        { n: "Viedma", c: "#f97316", pr: 220, rent: 80, colorId: "orange" },
+        { n: "Rawson", c: "#f97316", pr: 250, rent: 90, colorId: "orange" },
+        { n: "CÁRCEL", c: "#1e293b", type: "jail" },
+        { n: "Neuquén", c: "#eab308", pr: 300, rent: 110, colorId: "yellow" },
+        { n: "Mendoza", c: "#eab308", pr: 350, rent: 130, colorId: "yellow" },
+        { n: "San Juan", c: "#22c55e", pr: 400, rent: 160, colorId: "green" },
+        { n: "La Rioja", c: "#22c55e", pr: 450, rent: 180, colorId: "green" },
+        { n: "ARCA", c: "#fff", type: "special" },
+        { n: "Catamarca", c: "#06b6d4", pr: 500, rent: 210, colorId: "cyan" },
+        { n: "Tucumán", c: "#06b6d4", pr: 550, rent: 240, colorId: "cyan" },
+        { n: "Salta", c: "#3b82f6", pr: 600, rent: 280, colorId: "blue" },
+        { n: "Jujuy", c: "#3b82f6", pr: 650, rent: 310, colorId: "blue" },
+        { n: "PARKING", c: "#1e293b", type: "special" },
+        { n: "Córdoba", c: "#8b5cf6", pr: 750, rent: 380, colorId: "purple" },
+        { n: "Rosario", c: "#8b5cf6", pr: 800, rent: 420, colorId: "purple" },
+        { n: "La Plata", c: "#ec4899", pr: 950, rent: 550, colorId: "pink" },
+        { n: "CABA", c: "#ec4899", pr: 1300, rent: 800, colorId: "pink" }
     ];
 
     let players = [
-        { id: 0, name: "Jugador 1", money: 2000, pos: 0, color: "#ef4444", props: [] },
-        { id: 1, name: "Servidor", money: 2000, pos: 0, color: "#3b82f6", props: [], isBot: true }
+        { id: 0, name: "Jugador 1", money: 2500, pos: 0, color: "#ef4444", props: [], hotels: [] },
+        { id: 1, name: "Servidor", money: 2500, pos: 0, color: "#3b82f6", props: [], hotels: [], isBot: true }
     ];
     let turn = 0;
     let isMoving = false;
 
-    function initBoard() {
+    // Inicializar Tablero Cuadrado
+    function init() {
         const board = document.getElementById('board');
-        // Posicionamiento en espiral cuadrada
-        const positions = [
-            [5,5], [4,5], [3,5], [2,5], [1,5], [0,5], // Abajo
-            [0,4], [0,3], [0,2], [0,1], [0,0],         // Izquierda
-            [1,0], [2,0], [3,0], [4,0], [5,0],         // Arriba
-            [5,1], [5,2], [5,3], [5,4]                  // Derecha
-        ];
-
-        boardData.forEach((data, i) => {
+        const posMap = [[5,5],[4,5],[3,5],[2,5],[1,5],[0,5],[0,4],[0,3],[0,2],[0,1],[0,0],[1,0],[2,0],[3,0],[4,0],[5,0],[5,1],[5,2],[5,3],[5,4]];
+        
+        boardData.forEach((d, i) => {
             const cell = document.createElement('div');
             cell.className = 'cell';
-            cell.style.gridColumn = positions[i][0] + 1;
-            cell.style.gridRow = positions[i][1] + 1;
+            cell.id = `cell-${i}`;
+            cell.style.gridColumn = posMap[i][0] + 1;
+            cell.style.gridRow = posMap[i][1] + 1;
             cell.innerHTML = `
-                ${data.pr ? `<div class="cell-color" style="background:${data.c}"></div>` : ''}
-                <div style="margin-top: 15px">${data.n}</div>
-                ${data.pr ? `<div style="color:green">$${data.pr}</div>` : ''}
-                <div id="cell-container-${i}" style="position:relative; width:100%; height:20px"></div>
+                ${d.pr ? `<div class="cell-color" style="background:${d.c}"></div>` : ''}
+                <div style="margin-top:12px">${d.n}</div>
+                ${d.pr ? `<div style="color:#16a34a">$${d.pr}</div>` : ''}
+                <div class="hotel-container"></div>
             `;
             board.appendChild(cell);
         });
-        createTokens();
-        updateUI();
-    }
 
-    function createTokens() {
         players.forEach(p => {
             const t = document.createElement('div');
             t.className = 'token';
             t.id = `token-${p.id}`;
             t.style.backgroundColor = p.color;
-            document.getElementById('board').appendChild(t);
+            board.appendChild(t);
         });
-        moveTokenVisual(0, 0);
-        moveTokenVisual(1, 0);
+
+        updateTokens();
+        updateUI();
     }
 
     async function startTurn() {
         if(isMoving) return;
         isMoving = true;
-        document.getElementById('roll-btn').disabled = true;
+        const btn = document.getElementById('roll-btn');
+        btn.disabled = true;
 
         const diceEl = document.getElementById('dice');
-        diceEl.classList.add('rolling');
-        
-        await new Promise(r => setTimeout(r, 600));
+        diceEl.style.transform = "rotate(360deg)";
         const roll = Math.floor(Math.random() * 6) + 1;
-        diceEl.classList.remove('rolling');
+        
+        await new Promise(r => setTimeout(r, 500));
         diceEl.innerText = ['⚀','⚁','⚂','⚃','⚄','⚅'][roll-1];
+        diceEl.style.transform = "rotate(0deg)";
 
         const p = players[turn];
-        addLog(`${p.name} lanzó un ${roll}`);
+        addLog(`🎲 ${p.name} sacó ${roll}`);
 
-        // Movimiento paso a paso
         for(let i=0; i<roll; i++) {
             p.pos = (p.pos + 1) % boardData.length;
-            moveTokenVisual(p.id, p.pos);
-            if(p.pos === 0) {
-                p.money += 200;
-                addLog(`${p.name} pasó por Salida: +$200`);
-            }
-            await new Promise(r => setTimeout(r, 300));
+            updateTokens();
+            if(p.pos === 0) { p.money += 200; addLog("💵 ¡Cobraste $200 de Salida!"); }
+            await new Promise(r => setTimeout(r, 250));
         }
 
         handleLanding(p);
@@ -297,21 +287,10 @@
         updateUI();
 
         if(players[turn].isBot) {
-            setTimeout(startTurn, 1000);
+            setTimeout(startTurn, 1500);
         } else {
-            document.getElementById('roll-btn').disabled = false;
+            btn.disabled = false;
         }
-    }
-
-    function moveTokenVisual(pId, pos) {
-        const token = document.getElementById(`token-${pId}`);
-        const cell = document.getElementsByClassName('cell')[pos];
-        const rect = cell.getBoundingClientRect();
-        const boardRect = document.getElementById('board').getBoundingClientRect();
-        
-        const offset = pId * 10; // Para que no se tapen
-        token.style.left = (rect.left - boardRect.left + 15 + offset) + 'px';
-        token.style.top = (rect.top - boardRect.top + 25) + 'px';
     }
 
     function handleLanding(p) {
@@ -319,47 +298,122 @@
         if(!tile.pr) return;
 
         const owner = players.find(x => x.props.includes(tile.n));
+        
         if(owner && owner !== p) {
-            p.money -= tile.rent;
-            owner.money += tile.rent;
-            addLog(`¡Renta! ${p.name} pagó $${tile.rent} a ${owner.name}`);
+            let finalRent = tile.rent;
+            if(owner.hotels.includes(tile.n)) finalRent *= 4; // Renta x4 con hotel
+            
+            p.money -= finalRent;
+            owner.money += finalRent;
+            addLog(`🚩 Pago de arancel: $${finalRent} a ${owner.name}`);
         } else if(!owner && p.money >= tile.pr) {
-            p.money -= tile.pr;
-            p.props.push(tile.n);
-            addLog(`${p.name} compró ${tile.n}`);
+            // IA del servidor compra siempre si tiene dinero
+            if(!p.isBot || (p.isBot && p.money > tile.pr + 500)) {
+                p.money -= tile.pr;
+                p.props.push(tile.n);
+                addLog(`🏠 ${p.name} compró ${tile.n}`);
+            }
+        }
+        
+        // El servidor compra hoteles automáticamente si puede
+        if(p.isBot) checkBotHotels(p);
+    }
+
+    function buyHotel(propName) {
+        const p = players[0]; // Jugador humano
+        const tile = boardData.find(b => b.n === propName);
+        const hotelPrice = Math.floor(tile.pr * 1.5);
+
+        if(p.money >= hotelPrice && !p.hotels.includes(propName)) {
+            p.money -= hotelPrice;
+            p.hotels.push(propName);
+            addLog(`🏨 ¡Hotel construido en ${propName}! ($${hotelPrice})`);
+            
+            const cell = document.getElementById(`cell-${boardData.indexOf(tile)}`);
+            cell.classList.add('has-hotel');
+            cell.querySelector('.hotel-container').innerHTML = `<span class="hotel-icon">🏨</span>`;
+            updateUI();
         }
     }
 
+    function checkBotHotels(bot) {
+        boardData.forEach(tile => {
+            if(tile.colorId && canBuildHotel(bot, tile.colorId) && !bot.hotels.includes(tile.n)) {
+                const cost = Math.floor(tile.pr * 1.5);
+                if(bot.money > cost + 400) {
+                    bot.money -= cost;
+                    bot.hotels.push(tile.n);
+                    const cell = document.getElementById(`cell-${boardData.indexOf(tile)}`);
+                    cell.classList.add('has-hotel');
+                    cell.querySelector('.hotel-container').innerHTML = `<span class="hotel-icon">🏨</span>`;
+                }
+            }
+        });
+    }
+
+    function canBuildHotel(player, colorId) {
+        const propsInColor = boardData.filter(b => b.colorId === colorId).map(b => b.n);
+        return propsInColor.every(name => player.props.includes(name));
+    }
+
+    function updateTokens() {
+        players.forEach(p => {
+            const t = document.getElementById(`token-${p.id}`);
+            const cell = document.getElementById(`cell-${p.pos}`);
+            const rect = cell.getBoundingClientRect();
+            const bRect = document.getElementById('board').getBoundingClientRect();
+            
+            t.style.left = (rect.left - bRect.left + 10 + (p.id*12)) + 'px';
+            t.style.top = (rect.top - bRect.top + 20) + 'px';
+        });
+    }
+
     function updateUI() {
+        // Lista Jugadores
         const list = document.getElementById('players-list');
         list.innerHTML = '';
         players.forEach((p, i) => {
             const div = document.createElement('div');
             div.className = `player-info ${turn === i ? 'active' : ''}`;
             div.style.borderLeftColor = p.color;
-            div.innerHTML = `<b>${p.name}</b><br>Efectivo: $${p.money}<br><small>${p.props.length} Propiedades</small>`;
+            div.innerHTML = `<b>${p.name}</b><br>💰 $${p.money}`;
             list.appendChild(div);
         });
 
-        // Mostrar cartas del Jugador 1
-        const cardsCont = document.getElementById('cards-container');
-        cardsCont.innerHTML = '';
-        players[0].props.forEach(propName => {
-            const data = boardData.find(b => b.n === propName);
-            const card = document.createElement('div');
-            card.className = 'property-card';
-            card.style.borderTop = `4px solid ${data.c}`;
-            card.innerHTML = `<b>${data.n}</b><br>Renta: $${data.rent}`;
-            cardsCont.appendChild(card);
+        // Cartas Jugador 1
+        const cont = document.getElementById('cards-container');
+        cont.innerHTML = '';
+        players[0].props.forEach(pName => {
+            const tile = boardData.find(b => b.n === pName);
+            const hasAll = canBuildHotel(players[0], tile.colorId);
+            const hotelPrice = Math.floor(tile.pr * 1.5);
+            
+            const div = document.createElement('div');
+            div.className = 'property-card';
+            div.style.borderTop = `5px solid ${tile.c}`;
+            div.innerHTML = `
+                <b>${tile.n}</b><br>
+                Renta: $${players[0].hotels.includes(pName) ? tile.rent*4 : tile.rent}<br>
+                ${hasAll && !players[0].hotels.includes(pName) ? 
+                    `<button class="btn-hotel" onclick="buyHotel('${pName}')">Poner Hotel ($${hotelPrice})</button>` : 
+                    (players[0].hotels.includes(pName) ? '⭐ Tiene Hotel' : '')}
+            `;
+            cont.appendChild(div);
         });
     }
 
     function addLog(msg) {
         const log = document.getElementById('log');
-        log.innerHTML = `<div>> ${msg}</div>` + log.innerHTML;
+        const entry = document.createElement('div');
+        entry.style.marginBottom = "5px";
+        entry.style.borderBottom = "1px solid #334155";
+        entry.style.paddingBottom = "2px";
+        entry.innerText = `> ${msg}`;
+        log.appendChild(entry);
+        log.scrollTop = log.scrollHeight; // Auto-scroll al final
     }
 
-    initBoard();
+    init();
 </script>
 </body>
 </html>
