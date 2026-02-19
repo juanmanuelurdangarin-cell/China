@@ -2,175 +2,201 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ArgenPoly - Federal Edition</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ArgenPoly Mobile</title>
     <style>
-        :root { --bg: #0f172a; --panel: #ffffff; --primary: #0081C9; --accent: #f59e0b; --danger: #ef4444; --success: #22c55e; }
-        * { box-sizing: border-box; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; color: #1e293b; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow: hidden; }
-
-        /* MENU */
-        #setup-menu { background: white; padding: 30px; border-radius: 20px; width: 95%; max-width: 450px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5); z-index: 1000; }
-        .input-group { margin: 10px 0; text-align: left; }
-        input, select { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 14px; }
-
-        /* JUEGO */
-        #game-container { display: none; flex-direction: column; width: 100%; max-width: 1200px; height: 98vh; gap: 10px; padding: 10px; }
-        @media (min-width: 1024px) { #game-container { flex-direction: row; } }
-
-        #board-wrapper { flex: 1.5; background: #cbd5e1; border-radius: 15px; position: relative; aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; }
-        #board { display: grid; grid-template-columns: repeat(6, 1fr); grid-template-rows: repeat(6, 1fr); gap: 2px; width: 100%; height: 100%; padding: 5px; }
-
-        .cell { background: white; border: 1px solid #ddd; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; font-size: clamp(7px, 1.2vw, 9px); font-weight: bold; position: relative; padding: 2px; text-align: center; }
-        .cell-color { position: absolute; top: 0; width: 100%; height: 20%; }
+        :root { --bg: #0f172a; --panel: #ffffff; --primary: #0081C9; --success: #22c55e; --danger: #ef4444; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         
-        .hotels-row { display: flex; gap: 1px; position: absolute; top: 22%; width: 100%; justify-content: center; }
-        .hotel-dot { width: 5px; height: 5px; background: #e11d48; border-radius: 50%; display: none; border: 1px solid white; }
-
-        .token { width: 18px; height: 18px; border-radius: 50%; border: 3px solid white; position: absolute; z-index: 100; transition: all 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28); box-shadow: 0 3px 6px rgba(0,0,0,0.4); }
-
-        .ui-panel { flex: 1; background: white; border-radius: 15px; padding: 15px; display: flex; flex-direction: column; overflow: hidden; }
-        #log { height: 110px; background: #1e293b; color: #38bdf8; padding: 8px; font-family: monospace; font-size: 10px; overflow-y: auto; border-radius: 8px; margin: 5px 0; border: 2px solid #334155; }
-
-        .tabs { display: flex; gap: 4px; margin-bottom: 8px; overflow-x: auto; padding-bottom: 4px; }
-        .tab { padding: 6px 12px; border-radius: 6px; background: #f1f5f9; cursor: pointer; font-size: 11px; white-space: nowrap; font-weight: bold; transition: 0.2s; }
-        .tab.active { background: var(--primary); color: white; transform: scale(1.05); }
-
-        #prop-list { flex-grow: 1; overflow-y: auto; padding-right: 5px; }
-        
-        /* TARJETAS */
-        .prop-item { padding: 8px; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 6px; font-size: 11px; background: #f8fafc; cursor: pointer; transition: all 0.2s; }
-        .prop-item.selected { border: 2px solid var(--primary); background: #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        .rent-details { background: #f1f5f9; color: #475569; padding: 8px; border-radius: 6px; margin-top: 8px; font-size: 10px; }
-
-        /* BOTONES */
-        .btn-main { background: var(--primary); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.2s; margin-bottom: 8px; }
-        .btn-buy { background: var(--success); display: none; }
-        .btn-end { background: #64748b; display: none; }
-        .btn-main:disabled { background: #94a3b8 !important; cursor: not-allowed; opacity: 0.6; }
-        .btn-hotel { background: var(--success); color: white; border: none; padding: 6px; border-radius: 4px; font-size: 10px; cursor: pointer; width: 100%; margin-top: 8px; font-weight: bold; }
-        .btn-sell { background: var(--danger); color: white; border: none; padding: 6px; border-radius: 4px; font-size: 10px; cursor: pointer; width: 100%; margin-top: 8px; font-weight: bold; }
-
-        .player-status-card { padding: 12px; border-radius: 10px; margin-bottom: 8px; transition: 0.3s; border-left: 15px solid transparent; position: relative; }
-        .active-turn-indicator { border-left-width: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); transform: translateX(5px); font-weight: 900; }
-
-        .center-ui { grid-column: 2/6; grid-row: 2/6; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #f8fafc; border-radius: 10px; border: 2px dashed #cbd5e1; }
-        
-        #dice-val { transition: transform 0.4s; }
-        .rolling { animation: rotateDice 0.4s infinite; }
-        @keyframes rotateDice {
-            0% { transform: rotate(0deg) scale(1); }
-            50% { transform: rotate(180deg) scale(1.2); }
-            100% { transform: rotate(360deg) scale(1); }
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            background: var(--bg); 
+            margin: 0; 
+            color: #1e293b; 
+            display: flex; 
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden; /* Evita el rebote en iOS */
         }
 
-        .alert-deuda { background: #fee2e2; border: 2px solid var(--danger); color: var(--danger); padding: 10px; border-radius: 8px; font-weight: bold; font-size: 12px; margin-bottom: 10px; text-align: center; }
+        /* MENU INICIAL */
+        #setup-menu { 
+            position: fixed; inset: 0; background: white; z-index: 2000;
+            display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px;
+        }
+
+        /* CONTENEDOR PRINCIPAL RECOMODADO PARA MÓVIL */
+        #game-container { 
+            display: none; 
+            flex-direction: column; 
+            height: 100vh; 
+            width: 100vw;
+        }
+
+        /* 1. SECCIÓN SUPERIOR: EL TABLERO */
+        #board-section {
+            background: #cbd5e1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 5px;
+            flex-shrink: 0;
+        }
+        #board { 
+            display: grid; 
+            grid-template-columns: repeat(6, 1fr); 
+            grid-template-rows: repeat(6, 1fr); 
+            gap: 1px; 
+            width: 95vw; 
+            height: 95vw; 
+            max-width: 500px; 
+            max-height: 500px;
+            background: #94a3b8;
+            border: 2px solid #64748b;
+        }
+
+        /* 2. SECCIÓN MEDIA: CONTROLES Y LOG */
+        #middle-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: white;
+            border-radius: 20px 20px 0 0;
+            margin-top: -10px;
+            padding: 15px;
+            overflow-y: auto;
+            gap: 10px;
+        }
+
+        /* ESTILOS DE CELDAS OPTIMIZADOS */
+        .cell { background: white; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; font-size: 8px; font-weight: bold; padding: 1px; text-align: center; overflow: hidden; }
+        .cell-color { position: absolute; top: 0; width: 100%; height: 25%; }
+        
+        /* FICHAS MÁS VISIBLES */
+        .token { width: 14px; height: 14px; border-radius: 50%; border: 2px solid white; position: absolute; z-index: 100; transition: all 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28); box-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+
+        /* PANELES DE JUGADORES */
+        .players-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .player-status-card { padding: 8px; border-radius: 8px; border-left: 8px solid transparent; font-size: 11px; background: #f1f5f9; }
+        .active-turn-indicator { transform: scale(1.05); box-shadow: 0 2px 8px rgba(0,0,0,0.15); border-left-width: 12px; }
+
+        /* TABS DE PROPIEDADES */
+        .tabs { display: flex; gap: 5px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; }
+        .tab { padding: 8px 15px; background: #e2e8f0; border-radius: 20px; font-size: 12px; font-weight: bold; white-space: nowrap; }
+        .tab.active { background: var(--primary); color: white; }
+
+        /* BOTONES GRANDES PARA PULGARES */
+        .btn-main { 
+            width: 100%; padding: 15px; border-radius: 12px; border: none; 
+            font-weight: bold; font-size: 16px; color: white; cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 5px;
+        }
+        #roll-btn { background: var(--primary); }
+        #buy-btn { background: var(--success); display: none; }
+        #end-btn { background: #64748b; display: none; }
+
+        #log { 
+            background: #1e293b; color: #38bdf8; font-family: monospace; 
+            font-size: 10px; padding: 10px; border-radius: 8px; height: 80px; overflow-y: auto; 
+        }
+
+        /* MEDIA QUERY PARA COMPUTADORA (Revertir a horizontal) */
+        @media (min-width: 1024px) {
+            #game-container { flex-direction: row; padding: 20px; gap: 20px; }
+            #board-section { background: none; flex: 1.5; }
+            #board { width: 40vw; height: 40vw; }
+            #middle-section { border-radius: 20px; height: 100%; }
+        }
+
+        .prop-item { padding: 10px; background: #f8fafc; border-radius: 10px; margin-bottom: 8px; border: 1px solid #e2e8f0; }
+        .prop-item.selected { border: 2px solid var(--primary); background: white; }
+        .rent-details { background: #f1f5f9; padding: 8px; border-radius: 5px; margin: 5px 0; font-size: 10px; color: #64748b; }
     </style>
 </head>
 <body>
 
 <div id="setup-menu">
-    <h2 style="color: var(--primary); margin: 0;">🇦🇷 ARGENPOLY</h2>
-    <p style="font-size: 12px; color: #64748b;">Elegí bien qué comprar para ganar</p>
+    <h1 style="color: var(--primary); margin-bottom: 5px;">🇦🇷 ARGENPOLY</h1>
+    <p style="color: #64748b; margin-bottom: 20px;">Versión Mobile Federal</p>
     
-    <div class="input-group">
-        <label>Modo de Juego</label>
-        <select id="mode-select" onchange="toggleInputs()">
-            <option value="bot">Contra el Servidor</option>
-            <option value="multi">Multijugador</option>
+    <div style="width: 100%; max-width: 300px;">
+        <label style="font-size: 12px; font-weight: bold;">MODO</label>
+        <select id="mode-select" style="width:100%; padding:12px; margin-bottom:15px; border-radius:8px;">
+            <option value="bot">Vs. Servidor</option>
+            <option value="multi">2 Jugadores (Local)</option>
         </select>
-    </div>
-    
-    <div class="input-group">
-        <label>Velocidad</label>
-        <select id="speed-select">
-            <option value="400">Normal (x1)</option>
-            <option value="250">Rápido (x1.5)</option>
-            <option value="150">Turbo (x2)</option>
-        </select>
-    </div>
 
-    <div id="player-names">
-        <div class="input-group"><input type="text" id="p0-name" placeholder="Tu Nombre"></div>
+        <label style="font-size: 12px; font-weight: bold;">TU NOMBRE</label>
+        <input type="text" id="p0-name" placeholder="Escribe aquí..." style="width:100%; padding:12px; margin-bottom:20px; border-radius:8px; border:1px solid #ccc;">
+        
+        <button class="btn-main" onclick="initGame()">EMPEZAR JUEGO</button>
     </div>
-    
-    <button class="btn-main" onclick="initGame()">COMENZAR PARTIDA</button>
 </div>
 
 <div id="game-container">
-    <div class="ui-panel">
-        <h3 style="margin:0 0 10px 0">Estado Federal</h3>
-        <div id="players-list"></div>
-        <div id="log"></div>
-        <div id="controls">
-            <button id="roll-btn" class="btn-main" onclick="playTurn()">🎲 LANZAR DADOS</button>
-            <button id="buy-btn" class="btn-main btn-buy" onclick="buyCurrentTile()">💰 COMPRAR PROPIEDAD</button>
-            <button id="end-btn" class="btn-main btn-end" onclick="finishTurn()">⏭ FINALIZAR TURNO</button>
-        </div>
-    </div>
-
-    <div id="board-wrapper">
+    <div id="board-section">
         <div id="board">
-            <div class="center-ui">
-                <div id="dice-val" style="font-size:50px; margin-bottom:10px">🎲</div>
-                <div id="current-p-label" style="font-weight:900; color:var(--primary); text-align:center"></div>
+            <div style="grid-column: 2/6; grid-row: 2/6; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #f8fafc;">
+                <div id="dice-val" style="font-size: 40px;">🎲</div>
+                <div id="current-p-label" style="font-size: 10px; font-weight: bold; color: var(--primary); text-align: center;"></div>
             </div>
         </div>
+        <div id="tokens-layer" style="position: absolute; pointer-events: none;"></div>
     </div>
 
-    <div class="ui-panel">
-        <h3 style="margin:0 0 10px 0">Propiedades</h3>
+    <div id="middle-section">
+        <div class="players-row" id="players-list"></div>
+        
+        <div id="controls">
+            <button id="roll-btn" class="btn-main" onclick="playTurn()">🎲 LANZAR DADOS</button>
+            <button id="buy-btn" class="btn-main" onclick="buyCurrentTile()">💰 COMPRAR PROPIEDAD</button>
+            <button id="end-btn" class="btn-main" onclick="finishTurn()">⏭ FINALIZAR TURNO</button>
+        </div>
+
+        <div id="log"></div>
+
         <div class="tabs" id="tabs-container"></div>
         <div id="prop-list"></div>
     </div>
 </div>
 
 <script>
+    // Configuración de provincias (Igual que antes pero optimizada para lectura)
     const config = [
         { n: "SALIDA", c: "#64748b", type: "start" },
-        { n: "Ushuaia", prov: "T. del Fuego", c: "#ef4444", pr: 150, r: 40, cid: "TDF" },
-        { n: "Río Grande", prov: "T. del Fuego", c: "#ef4444", pr: 180, r: 50, cid: "TDF" },
-        { n: "R. Gallegos", prov: "Santa Cruz", c: "#f97316", pr: 220, r: 65, cid: "SC" },
-        { n: "Calafate", prov: "Santa Cruz", c: "#f97316", pr: 250, r: 80, cid: "SC" },
-        { n: "CÁRCEL", c: "#334155", type: "jail" },
-        { n: "Rawson", prov: "Chubut", c: "#eab308", pr: 300, r: 100, cid: "CH" },
-        { n: "P. Madryn", prov: "Chubut", c: "#eab308", pr: 350, r: 120, cid: "CH" },
-        { n: "Viedma", prov: "Río Negro", c: "#22c55e", pr: 400, r: 150, cid: "RN" },
-        { n: "Bariloche", prov: "Río Negro", c: "#22c55e", pr: 450, r: 180, cid: "RN" },
-        { n: "SUERTE", c: "#fff", type: "special" },
-        { n: "Neuquén Cap.", prov: "Neuquén", c: "#06b6d4", pr: 500, r: 210, cid: "NQ" },
-        { n: "S.M. de los Andes", prov: "Neuquén", c: "#06b6d4", pr: 550, r: 250, cid: "NQ" },
-        { n: "Mendoza Cap.", prov: "Mendoza", c: "#3b82f6", pr: 600, r: 300, cid: "MZ" },
-        { n: "San Rafael", prov: "Mendoza", c: "#3b82f6", pr: 650, r: 350, cid: "MZ" },
-        { n: "ARCA", c: "#334155", type: "special" },
-        { n: "Córdoba Cap.", prov: "Córdoba", c: "#8b5cf6", pr: 750, r: 450, cid: "CB" },
-        { n: "Carlos Paz", prov: "Córdoba", c: "#8b5cf6", pr: 800, r: 500, cid: "CB" },
-        { n: "La Plata", prov: "Bs. Aires", c: "#ec4899", pr: 1000, r: 700, cid: "BA" },
-        { n: "Mar del Plata", prov: "Bs. Aires", c: "#ec4899", pr: 1300, r: 900, cid: "BA" }
+        { n: "Ushuaia", prov: "TDF", c: "#ef4444", pr: 150, r: 40 },
+        { n: "R.Grande", prov: "TDF", c: "#ef4444", pr: 180, r: 50 },
+        { n: "R.Gallegos", prov: "SC", c: "#f97316", pr: 220, r: 65 },
+        { n: "Calafate", prov: "SC", c: "#f97316", pr: 250, r: 80 },
+        { n: "CÁRCEL", c: "#334155" },
+        { n: "Rawson", prov: "CH", c: "#eab308", pr: 300, r: 100 },
+        { n: "Madryn", prov: "CH", c: "#eab308", pr: 350, r: 120 },
+        { n: "Viedma", prov: "RN", c: "#22c55e", pr: 400, r: 150 },
+        { n: "Bariloche", prov: "RN", c: "#22c55e", pr: 450, r: 180 },
+        { n: "SUERTE", c: "#fff" },
+        { n: "Neuquén", prov: "NQ", c: "#06b6d4", pr: 500, r: 210 },
+        { n: "S.M.Andes", prov: "NQ", c: "#06b6d4", pr: 550, r: 250 },
+        { n: "Mendoza", prov: "MZ", c: "#3b82f6", pr: 600, r: 300 },
+        { n: "S.Rafael", prov: "MZ", c: "#3b82f6", pr: 650, r: 350 },
+        { n: "ARCA", c: "#334155" },
+        { n: "Córdoba", prov: "CB", c: "#8b5cf6", pr: 750, r: 450 },
+        { n: "C.Paz", prov: "CB", c: "#8b5cf6", pr: 800, r: 500 },
+        { n: "La Plata", prov: "BA", c: "#ec4899", pr: 1000, r: 700 },
+        { n: "M.Plata", prov: "BA", c: "#ec4899", pr: 1300, r: 900 }
     ];
 
     let players = [];
     let turn = 0;
     let viewTab = 0;
     let selectedPropName = null;
-    let gameSpeed = 400;
     const pColors = ["#ef4444", "#3b82f6", "#10b981", "#f59e0b"];
-
-    function toggleInputs() { generateNameInputs(); }
-
-    function generateNameInputs() {
-        const mode = document.getElementById('mode-select').value;
-        const container = document.getElementById('player-names');
-        container.innerHTML = '<div class="input-group"><input type="text" id="p0-name" placeholder="Tu Nombre"></div>';
-        if(mode === 'multi') container.innerHTML += '<div class="input-group"><input type="text" id="p1-name" placeholder="Jugador 2"></div>';
-    }
 
     function initGame() {
         const mode = document.getElementById('mode-select').value;
-        gameSpeed = parseInt(document.getElementById('speed-select').value);
-        players = [{ id: 0, name: document.getElementById('p0-name').value || "Jugador 1", money: 2000, pos: 0, color: pColors[0], props: [], hotels: {}, isBot: false, isOut: false }];
+        players = [{ id: 0, name: document.getElementById('p0-name').value || "P1", money: 2000, pos: 0, color: pColors[0], props: [], hotels: {}, isBot: false, isOut: false }];
+        
         if(mode === 'bot') players.push({ id: 1, name: "Servidor", money: 2000, pos: 0, color: pColors[1], props: [], hotels: {}, isBot: true, isOut: false });
-        else players.push({ id: 1, name: document.getElementById('p1-name').value || "Jugador 2", money: 2000, pos: 0, color: pColors[1], props: [], hotels: {}, isBot: false, isOut: false });
+        else players.push({ id: 1, name: "P2", money: 2000, pos: 0, color: pColors[1], props: [], hotels: {}, isBot: false, isOut: false });
 
         document.getElementById('setup-menu').style.display = 'none';
         document.getElementById('game-container').style.display = 'flex';
@@ -181,75 +207,69 @@
     function renderBoard() {
         const board = document.getElementById('board');
         const posMap = [[5,5],[4,5],[3,5],[2,5],[1,5],[0,5],[0,4],[0,3],[0,2],[0,1],[0,0],[1,0],[2,0],[3,0],[4,0],[5,0],[5,1],[5,2],[5,3],[5,4]];
+        
         config.forEach((d, i) => {
             const cell = document.createElement('div');
             cell.className = 'cell';
             cell.id = `cell-${i}`;
             cell.style.gridColumn = posMap[i][0] + 1;
             cell.style.gridRow = posMap[i][1] + 1;
-            cell.innerHTML = `${d.pr ? `<div class="cell-color" style="background:${d.c}"></div>` : ''}<div class="hotels-row" id="h-${i}"><div class="hotel-dot"></div><div class="hotel-dot"></div><div class="hotel-dot"></div><div class="hotel-dot"></div></div><div>${d.n}</div>${d.pr ? `<div style="color:green; font-size:7px" id="price-${i}">$${d.pr}</div>` : ''}`;
+            cell.innerHTML = `
+                ${d.pr ? `<div class="cell-color" style="background:${d.c}"></div>` : ''}
+                <div style="z-index:1; padding-bottom:2px">${d.n}</div>
+                ${d.pr ? `<div style="font-size:6px; color:green" id="pr-${i}">$${d.pr}</div>` : ''}
+            `;
             board.appendChild(cell);
         });
+
         players.forEach(p => {
             const t = document.createElement('div');
             t.className = 'token'; t.id = `tk-${p.id}`; t.style.backgroundColor = p.color;
-            document.getElementById('board-wrapper').appendChild(t);
+            document.getElementById('board-section').appendChild(t);
         });
         updateTokenPos();
     }
 
     async function playTurn() {
         const p = players[turn];
-        if(p.isOut || p.money < 0) return;
-
-        // Auto-seleccionar pestaña del jugador actual
+        if(p.money < 0) return;
+        
         viewTab = turn;
-        selectedPropName = null;
-
         document.getElementById('roll-btn').disabled = true;
-        const diceEl = document.getElementById('dice-val');
-        diceEl.classList.add('rolling');
+        document.getElementById('dice-val').style.transform = "rotate(360deg)";
 
-        await new Promise(r => setTimeout(r, 600));
         const roll = Math.floor(Math.random() * 6) + 1;
-        diceEl.classList.remove('rolling');
-        diceEl.innerText = ['⚀','⚁','⚂','⚃','⚄','⚅'][roll-1];
-
+        
         for(let i=0; i<roll; i++) {
             p.pos = (p.pos + 1) % config.length;
             updateTokenPos();
-            if(p.pos === 0) { p.money += 200; addLog(`${p.name} cobró $200 de salida`); }
-            await new Promise(r => setTimeout(r, gameSpeed / 2));
+            if(p.pos === 0) { p.money += 200; addLog("Cobraste $200"); }
+            await new Promise(r => setTimeout(r, 250));
         }
-        
-        checkLanding();
+
+        document.getElementById('dice-val').innerText = ['⚀','⚁','⚂','⚃','⚄','⚅'][roll-1];
+        checkLanding(p);
     }
 
-    function checkLanding() {
-        const p = players[turn];
+    function checkLanding(p) {
         const tile = config[p.pos];
         const owner = players.find(x => x.props.includes(tile.n));
-        
+
         if(owner && owner !== p && !owner.isOut) {
-            const rent = tile.r * (1 + (owner.hotels[tile.n] || 0));
+            const rent = tile.r;
             p.money -= rent; owner.money += rent;
-            addLog(`${p.name} pagó $${rent} a ${owner.name}`);
-            updateUI();
-            if(p.money < 0) {
-                if(p.isBot) botResolveDebt(p);
-                return;
-            }
+            addLog(`Pagaste $${rent} a ${owner.name}`);
         } else if(!owner && tile.pr) {
             if(p.isBot) {
-                if(p.money > tile.pr + 400) buyCurrentTile();
+                if(p.money > tile.pr + 300) buyCurrentTile();
             } else {
                 document.getElementById('buy-btn').style.display = 'block';
-                document.getElementById('buy-btn').innerText = `💰 COMPRAR ${tile.n.toUpperCase()} ($${tile.pr})`;
+                document.getElementById('buy-btn').innerText = `COMPRAR: $${tile.pr}`;
             }
         }
 
         if(!p.isBot) document.getElementById('end-btn').style.display = 'block';
-        else setTimeout(finishTurn, gameSpeed * 2);
+        else setTimeout(finishTurn, 1000);
         updateUI();
     }
 
@@ -259,12 +279,10 @@
         if(p.money >= tile.pr) {
             p.money -= tile.pr;
             p.props.push(tile.n);
-            addLog(`${p.name} compró ${tile.n}`);
+            document.getElementById(`pr-${p.pos}`).innerText = "ADQUIRIDO";
             document.getElementById('buy-btn').style.display = 'none';
-            document.getElementById(`price-${p.pos}`).innerHTML = `<span style="color:${p.color}">● ${p.name}</span>`;
+            addLog(`Compraste ${tile.n}`);
             updateUI();
-        } else {
-            alert("No tienes suficiente dinero");
         }
     }
 
@@ -272,127 +290,83 @@
         document.getElementById('buy-btn').style.display = 'none';
         document.getElementById('end-btn').style.display = 'none';
         document.getElementById('roll-btn').disabled = false;
-        
         turn = (turn + 1) % players.length;
-        if(players[turn].isOut) return finishTurn();
-        
+        if(players[turn].isOut) finishTurn();
         updateUI();
-        if(players[turn].isBot) setTimeout(playTurn, gameSpeed);
-    }
-
-    function sellProp(pId, propName) {
-        if(!confirm(`¿Vender ${propName}?`)) return;
-        const p = players[pId];
-        const tile = config.find(c => c.n === propName);
-        p.money += Math.floor(tile.pr / 2);
-        p.props = p.props.filter(n => n !== propName);
-        delete p.hotels[propName];
-        document.getElementById(`price-${config.indexOf(tile)}`).innerHTML = `<span style="color:green">$${tile.pr}</span>`;
-        addLog(`${p.name} vendió ${propName}`);
-        selectedPropName = null;
-        updateUI();
-        if(p.money >= 0 && turn === pId) finishTurn();
+        if(players[turn].isBot) setTimeout(playTurn, 1000);
     }
 
     function updateUI() {
         const pList = document.getElementById('players-list');
         pList.innerHTML = '';
         players.forEach((p, i) => {
-            const isTurn = turn === i;
             pList.innerHTML += `
-                <div class="player-status-card ${isTurn ? 'active-turn-indicator' : ''} ${p.isOut?'player-out':''}" 
-                     style="background: ${isTurn ? p.color + '22' : '#f8fafc'}; border-left-color: ${p.color}">
-                    <div style="font-size:14px"><b>${p.name}</b></div>
-                    <div style="color:${p.money<0?'red':'green'}; font-weight:bold">$${p.money}</div>
+                <div class="player-status-card ${turn===i?'active-turn-indicator':''}" 
+                     style="border-left-color:${p.color}; background:${turn===i?p.color+'15':'#f1f5f9'}">
+                    <b>${p.name}</b><br>$${p.money}
                 </div>`;
         });
-        
-        const activeP = players[turn];
-        document.getElementById('current-p-label').innerText = "TURNO DE: " + activeP.name;
-
-        if(activeP.money < 0 && !activeP.isBot) {
-            document.getElementById('controls').innerHTML = `<div class="alert-deuda">SALDO NEGATIVO: $${activeP.money}</div>`;
-            if(activeP.props.length === 0) document.getElementById('controls').innerHTML += `<button class="btn-main" style="background:black" onclick="eliminarJugador(players[turn])">BANCARROTA</button>`;
-        } else if (!activeP.isBot && document.getElementById('roll-btn') === null) {
-            // Restaurar controles si no es bot y no existen
-            location.reload(); // Simplificado para el ejemplo
-        }
 
         const tCont = document.getElementById('tabs-container');
         tCont.innerHTML = '';
         players.forEach((p, i) => {
             const tab = document.createElement('div');
             tab.className = `tab ${viewTab === i ? 'active' : ''}`;
-            tab.style.borderBottom = `3px solid ${p.color}`;
             tab.innerText = p.name;
             tab.onclick = () => { viewTab = i; selectedPropName = null; updateUI(); };
             tCont.appendChild(tab);
         });
 
-        renderPropertyList();
+        renderProps();
     }
 
-    function renderPropertyList() {
-        const propList = document.getElementById('prop-list');
-        propList.innerHTML = '';
+    function renderProps() {
+        const container = document.getElementById('prop-list');
+        container.innerHTML = '';
         const viewer = players[viewTab];
-        const orderedProps = config.filter(tile => viewer.props.includes(tile.n)).map(tile => tile.n);
-
-        orderedProps.forEach(pName => {
-            const tile = config.find(c => c.n === pName);
-            const isSelected = selectedPropName === pName;
-            const hCount = viewer.hotels[pName] || 0;
-            
+        
+        // Ordenado por tablero
+        const ordered = config.filter(c => viewer.props.includes(c.n));
+        
+        ordered.forEach(tile => {
+            const isSelected = selectedPropName === tile.n;
             const div = document.createElement('div');
             div.className = `prop-item ${isSelected ? 'selected' : ''}`;
             div.style.borderTop = `4px solid ${tile.c}`;
-            div.onclick = () => { selectedPropName = isSelected ? null : pName; updateUI(); };
-
-            let content = `<b>${pName}</b> <small>Renta: $${tile.r * (1+hCount)}</small>`;
+            div.onclick = () => { selectedPropName = isSelected ? null : tile.n; updateUI(); };
+            
+            let html = `<b>${tile.n}</b> <small>(${tile.prov})</small> <span style="float:right">$${tile.r}</span>`;
             if(isSelected) {
-                content += `<div class="rent-details">Base: $${tile.r} | +1 Hotel: $${tile.r*2} | +2: $${tile.r*3} | +3: $${tile.r*4} | +4: $${tile.r*5}</div>`;
-                const hasMonopoly = config.filter(c => c.cid === tile.cid).every(c => viewer.props.includes(c.n));
-                if(hasMonopoly && hCount < 4 && viewer.id === turn && !viewer.isBot) {
-                    content += `<button class="btn-hotel" onclick="event.stopPropagation(); buildHotel('${pName}')">MEJORAR ($${Math.floor(tile.pr*0.7)})</button>`;
+                html += `<div class="rent-details">Renta Base: $${tile.r}</div>`;
+                if(viewer.id === turn && !viewer.isBot) {
+                    html += `<button class="btn-main" style="background:var(--danger); padding:8px; font-size:12px;" 
+                             onclick="sellProp('${tile.n}')">VENDER POR $${tile.pr/2}</button>`;
                 }
-                if(viewer.id === turn && !viewer.isBot) content += `<button class="btn-sell" onclick="event.stopPropagation(); sellProp(${viewer.id}, '${pName}')">VENDER POR $${Math.floor(tile.pr/2)}</button>`;
             }
-            div.innerHTML = content;
-            propList.appendChild(div);
+            div.innerHTML = html;
+            container.appendChild(div);
         });
     }
 
-    function buildHotel(propName) {
+    function sellProp(name) {
+        if(!confirm("¿Vender propiedad al 50%?")) return;
         const p = players[turn];
-        const tile = config.find(c => c.n === propName);
-        const cost = Math.floor(tile.pr * 0.7);
-        const current = p.hotels[propName] || 0;
-        if(p.money >= cost) {
-            p.money -= cost; p.hotels[propName] = current + 1;
-            document.querySelectorAll(`#h-${config.indexOf(tile)} .hotel-dot`)[current].style.display = 'block';
-            updateUI();
-        }
-    }
-
-    function botResolveDebt(p) {
-        while(p.money < 0 && p.props.length > 0) sellProp(p.id, p.props[0]);
-        if(p.money < 0) eliminarJugador(p); else finishTurn();
-    }
-
-    function eliminarJugador(p) {
-        p.isOut = true; addLog(`${p.name} ELIMINADO`);
-        if(players.filter(pl => !pl.isOut).length === 1) { alert("¡FIN DEL JUEGO!"); location.reload(); }
-        finishTurn();
+        const tile = config.find(c => c.n === name);
+        p.money += (tile.pr / 2);
+        p.props = p.props.filter(n => n !== name);
+        addLog(`Vendiste ${name}`);
+        updateUI();
+        if(p.money >= 0) finishTurn();
     }
 
     function updateTokenPos() {
         players.forEach((p, i) => {
             const t = document.getElementById(`tk-${p.id}`);
             const cell = document.getElementById(`cell-${p.pos}`);
-            const bRect = document.getElementById('board').getBoundingClientRect();
-            const cRect = cell.getBoundingClientRect();
-            t.style.left = (cRect.left - bRect.left + 8 + (i*6)) + 'px';
-            t.style.top = (cRect.top - bRect.top + 8) + 'px';
+            const rect = cell.getBoundingClientRect();
+            const bRect = document.getElementById('board-section').getBoundingClientRect();
+            t.style.left = (rect.left - bRect.left + (i*10)) + 'px';
+            t.style.top = (rect.top - bRect.top + 10) + 'px';
         });
     }
 
@@ -400,7 +374,8 @@
         const l = document.getElementById('log');
         l.innerHTML = `<div>• ${msg}</div>` + l.innerHTML;
     }
-    generateNameInputs();
+
+    window.onresize = updateTokenPos;
 </script>
 </body>
 </html>
