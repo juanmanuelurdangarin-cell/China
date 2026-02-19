@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ArgenPoly - Federal Edition</title>
     <style>
-        :root { --bg: #0f172a; --panel: #ffffff; --primary: #0081C9; --accent: #f59e0b; }
+        :root { --bg: #0f172a; --panel: #ffffff; --primary: #0081C9; --accent: #f59e0b; --danger: #ef4444; }
         * { box-sizing: border-box; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; color: #1e293b; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
 
@@ -27,7 +27,7 @@
         .hotels-row { display: flex; gap: 1px; position: absolute; top: 22%; width: 100%; justify-content: center; }
         .hotel-dot { width: 5px; height: 5px; background: #e11d48; border-radius: 50%; display: none; border: 1px solid white; }
 
-        .token { width: 14px; height: 14px; border-radius: 50%; border: 2px solid white; position: absolute; z-index: 100; transition: all 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28); box-shadow: 0 2px 4px rgba(0,0,0,0.4); }
+        .token { width: 14px; height: 14px; border-radius: 50%; border: 2px solid white; position: absolute; z-index: 100; transition: all 0.4s; box-shadow: 0 2px 4px rgba(0,0,0,0.4); }
 
         .ui-panel { flex: 1; background: white; border-radius: 15px; padding: 15px; display: flex; flex-direction: column; overflow: hidden; }
         #log { height: 100px; background: #1e293b; color: #38bdf8; padding: 8px; font-family: monospace; font-size: 10px; overflow-y: auto; border-radius: 8px; margin: 5px 0; }
@@ -40,17 +40,19 @@
         .prop-item { padding: 8px; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 6px; font-size: 11px; background: #f8fafc; }
         
         .btn-main { background: var(--primary); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.2s; }
-        .btn-main:active { transform: scale(0.98); }
+        .btn-main:disabled { background: #94a3b8; cursor: not-allowed; }
         .btn-hotel { background: #10b981; color: white; border: none; padding: 4px; border-radius: 4px; font-size: 9px; cursor: pointer; width: 100%; margin-top: 4px; }
+        .btn-sell { background: var(--danger); color: white; border: none; padding: 4px; border-radius: 4px; font-size: 9px; cursor: pointer; width: 100%; margin-top: 2px; }
 
         .center-ui { grid-column: 2/6; grid-row: 2/6; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #f8fafc; border-radius: 10px; border: 2px dashed #cbd5e1; }
+        .player-out { opacity: 0.5; text-decoration: line-through; }
     </style>
 </head>
 <body>
 
 <div id="setup-menu">
     <h2 style="color: var(--primary); margin: 0;">🇦🇷 ARGENPOLY</h2>
-    <p style="font-size: 12px; color: #64748b;">Domina las provincias argentinas</p>
+    <p style="font-size: 12px; color: #64748b;">Vende tus propiedades si te quedas sin fondos</p>
     
     <div class="input-group">
         <label>Modo de Juego</label>
@@ -98,7 +100,7 @@
     </div>
 
     <div class="ui-panel">
-        <h3 style="margin:0 0 10px 0">Títulos de Propiedad</h3>
+        <h3 style="margin:0 0 10px 0">Gestión de Bienes</h3>
         <div class="tabs" id="tabs-container"></div>
         <div id="prop-list"></div>
     </div>
@@ -154,9 +156,9 @@
         const qty = mode === 'bot' ? 1 : parseInt(document.getElementById('player-qty').value);
         players = [];
         for(let i=0; i<qty; i++) {
-            players.push({ id: i, name: document.getElementById(`p${i}-name`).value || `Jugador ${i+1}`, money: 2500, pos: 0, color: pColors[i], props: [], hotels: {}, isBot: false });
+            players.push({ id: i, name: document.getElementById(`p${i}-name`).value || `Jugador ${i+1}`, money: 2500, pos: 0, color: pColors[i], props: [], hotels: {}, isBot: false, isOut: false });
         }
-        if(mode === 'bot') players.push({ id: 1, name: "Servidor", money: 2500, pos: 0, color: pColors[1], props: [], hotels: {}, isBot: true });
+        if(mode === 'bot') players.push({ id: players.length, name: "Servidor", money: 2500, pos: 0, color: pColors[players.length], props: [], hotels: {}, isBot: true, isOut: false });
         
         document.getElementById('setup-menu').style.display = 'none';
         document.getElementById('game-container').style.display = 'flex';
@@ -186,6 +188,8 @@
 
     async function playTurn() {
         const p = players[turn];
+        if(p.isOut) { nextTurn(); return; }
+
         document.getElementById('roll-btn').disabled = true;
         const roll = Math.floor(Math.random() * 6) + 1;
         document.getElementById('dice-val').innerText = ['⚀','⚁','⚂','⚃','⚄','⚅'][roll-1];
@@ -193,20 +197,22 @@
         for(let i=0; i<roll; i++) {
             p.pos = (p.pos + 1) % config.length;
             updateTokenPos();
-            if(p.pos === 0) { p.money += 200; addLog(`${p.name} pasó por Salida (+$200)`); }
+            if(p.pos === 0) { p.money += 200; addLog(`${p.name} cobró $200 de salida`); }
             await new Promise(r => setTimeout(r, 200));
         }
         handleLanding(p);
-        turn = (turn + 1) % players.length;
         updateUI();
-        if(players[turn].isBot) setTimeout(playTurn, 1000);
-        else document.getElementById('roll-btn').disabled = false;
+
+        if(!checkBancarrota(p)) {
+            nextTurn();
+        }
     }
 
     function handleLanding(p) {
         const tile = config[p.pos];
         if(!tile.pr) return;
         const owner = players.find(x => x.props.includes(tile.n));
+        
         if(owner && owner !== p) {
             const rent = tile.r * (1 + (owner.hotels[tile.n] || 0));
             p.money -= rent; owner.money += rent;
@@ -214,21 +220,81 @@
         } else if(!owner && p.money >= tile.pr) {
             if(!p.isBot || p.money > 1000) {
                 p.money -= tile.pr; p.props.push(tile.n);
-                addLog(`${p.name} compró ${tile.n} (${tile.prov})`);
+                addLog(`${p.name} compró ${tile.n}`);
             }
         }
     }
 
+    function checkBancarrota(p) {
+        if(p.money < 0) {
+            if(p.props.length === 0) {
+                eliminarJugador(p);
+                return true;
+            } else {
+                addLog(`⚠️ ${p.name} está en deuda! Vende propiedades.`);
+                if(p.isBot) {
+                    while(p.money < 0 && p.props.length > 0) sellProp(p.id, p.props[0]);
+                    if(p.money < 0) eliminarJugador(p);
+                    return false;
+                }
+                return false;
+            }
+        }
+        return false;
+    }
+
+    function sellProp(pId, propName) {
+        const p = players[pId];
+        const tile = config.find(c => c.n === propName);
+        const sellValue = Math.floor(tile.pr / 2);
+        
+        p.money += sellValue;
+        p.props = p.props.filter(n => n !== propName);
+        delete p.hotels[propName];
+        
+        // Limpiar visual en tablero
+        const idx = config.indexOf(tile);
+        const dots = document.querySelectorAll(`#h-${idx} .hotel-dot`);
+        dots.forEach(d => d.style.display = 'none');
+
+        addLog(`💰 ${p.name} vendió ${propName} por $${sellValue}`);
+        updateUI();
+    }
+
+    function eliminarJugador(p) {
+        p.isOut = true;
+        p.money = 0;
+        p.props = [];
+        p.hotels = {};
+        document.getElementById(`tk-${p.id}`).style.display = 'none';
+        addLog(`❌ ${p.name} ha quedado fuera de juego!`);
+        
+        const activos = players.filter(pl => !pl.isOut);
+        if(activos.length === 1) {
+            alert(`¡EL GANADOR ES ${activos[0].name.toUpperCase()}!`);
+            location.reload();
+        }
+        nextTurn();
+    }
+
+    function nextTurn() {
+        turn = (turn + 1) % players.length;
+        if(players[turn].isOut) { nextTurn(); return; }
+        
+        updateUI();
+        if(players[turn].isBot) setTimeout(playTurn, 1000);
+        else document.getElementById('roll-btn').disabled = false;
+    }
+
     function buildHotel(propName) {
-        const p = players[turn === 0 ? 0 : turn-1]; // Fix para el humano
+        const p = players[turn];
         const tile = config.find(c => c.n === propName);
         const cost = Math.floor(tile.pr * 0.7);
         const current = p.hotels[propName] || 0;
-        
         if(p.money >= cost && current < 4) {
             p.money -= cost;
             p.hotels[propName] = current + 1;
-            addLog(`🏨 Hotel en ${propName} (Total: ${p.hotels[propName]})`);
+            addLog(`🏨 Hotel en ${propName}`);
             const dots = document.querySelectorAll(`#h-${config.indexOf(tile)} .hotel-dot`);
             dots[current].style.display = 'block';
             updateUI();
@@ -255,7 +321,7 @@
         const pList = document.getElementById('players-list');
         pList.innerHTML = '';
         players.forEach((p, i) => {
-            pList.innerHTML += `<div style="border-left:5px solid ${p.color}; padding:5px; margin-bottom:5px; background:${turn===i?'#e0f2fe':'#f1f5f9'}; font-size:12px"><b>${p.name}</b>: $${p.money}</div>`;
+            pList.innerHTML += `<div class="${p.isOut?'player-out':''} " style="border-left:5px solid ${p.color}; padding:5px; margin-bottom:5px; background:${turn===i?'#e0f2fe':'#f1f5f9'}; font-size:12px"><b>${p.name}</b>: $${p.money}</div>`;
         });
         document.getElementById('current-p-label').innerText = "TURNO DE: " + players[turn].name;
 
@@ -280,7 +346,8 @@
                 <div class="prop-item" style="border-top:4px solid ${tile.c}">
                     <b>${pName}</b> <small>(${tile.prov})</small><br>
                     Renta: $${tile.r * (1+hCount)} | Hoteles: ${hCount}/4<br>
-                    ${hasMonopoly && hCount < 4 && viewer.id === 0 && turn === 0 ? `<button class="btn-hotel" onclick="buildHotel('${pName}')">Mejorar ($${Math.floor(tile.pr*0.7)})</button>` : (hasMonopoly ? '✨ Provincia Completa' : 'Faltan ciudades')}
+                    ${hasMonopoly && hCount < 4 && viewer.id === turn && !viewer.isBot ? `<button class="btn-hotel" onclick="buildHotel('${pName}')">Mejorar ($${Math.floor(tile.pr*0.7)})</button>` : ''}
+                    ${viewer.id === turn && !viewer.isBot ? `<button class="btn-sell" onclick="sellProp(${viewer.id}, '${pName}')">Vender por $${Math.floor(tile.pr/2)}</button>` : ''}
                 </div>`;
         });
     }
