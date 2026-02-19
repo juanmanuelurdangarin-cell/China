@@ -1,191 +1,365 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>Monopoly Argentina</title>
-<style>
-body {
-    font-family: Arial, sans-serif;
-    background: linear-gradient(to bottom, #74acdf, white);
-    text-align: center;
-}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ArgenPoly Deluxe</title>
+    <style>
+        :root {
+            --bg: #1a1a2e;
+            --board-bg: #e2e8f0;
+            --panel: #ffffff;
+            --primary: #0081C9;
+            --accent: #FFB100;
+        }
 
-h1 {
-    color: #0033a0;
-}
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg);
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #333;
+        }
 
-#board {
-    display: grid;
-    grid-template-columns: repeat(5, 120px);
-    grid-template-rows: repeat(5, 120px);
-    gap: 4px;
-    margin: 20px auto;
-    width: 620px;
-}
+        #game-container {
+            display: grid;
+            grid-template-columns: 280px 600px 320px;
+            gap: 20px;
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
 
-.cell {
-    background: white;
-    border: 2px solid black;
-    font-size: 12px;
-    padding: 5px;
-    position: relative;
-}
+        /* TABLERO CUADRADO */
+        #board {
+            width: 600px;
+            height: 600px;
+            background: var(--board-bg);
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            grid-template-rows: repeat(6, 1fr);
+            gap: 4px;
+            padding: 4px;
+            border-radius: 8px;
+            position: relative;
+        }
 
-.player {
-    font-size: 18px;
-    font-weight: bold;
-}
+        .center-space {
+            grid-column: 2 / 6;
+            grid-row: 2 / 6;
+            background: #f8fafc;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border-radius: 4px;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.05);
+        }
 
-.controls {
-    margin-top: 20px;
-}
+        .cell {
+            background: white;
+            border-radius: 2px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 5px;
+            font-size: 10px;
+            font-weight: bold;
+            text-align: center;
+            position: relative;
+        }
 
-button {
-    padding: 10px 20px;
-    font-size: 16px;
-    background-color: #0033a0;
-    color: white;
-    border: none;
-    cursor: pointer;
-}
+        .cell-color {
+            height: 15px;
+            width: 100%;
+            position: absolute;
+            top: 0;
+        }
 
-button:hover {
-    background-color: #001f5c;
-}
+        /* FICHAS */
+        .token {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            position: absolute;
+            transition: all 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+            z-index: 10;
+        }
 
-#log {
-    margin-top: 20px;
-    height: 120px;
-    overflow-y: auto;
-    background: white;
-    border: 2px solid black;
-    padding: 10px;
-}
+        /* DADO ANIMADO */
+        #dice {
+            width: 60px;
+            height: 60px;
+            background: white;
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 35px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+            transition: transform 0.5s;
+        }
 
-img {
-    width: 80px;
-    margin-top: 10px;
-}
-</style>
+        .rolling { animation: roll 0.1s infinite; }
+        @keyframes roll {
+            0% { transform: rotate(0deg) scale(1.1); }
+            100% { transform: rotate(360deg) scale(1.1); }
+        }
+
+        /* PANELES LATERALES */
+        .side-panel {
+            background: var(--panel);
+            border-radius: 15px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .player-info {
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            border-left: 6px solid #ccc;
+            background: #f1f5f9;
+        }
+
+        .player-info.active { border-left-width: 12px; background: white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+
+        #log {
+            flex-grow: 1;
+            background: #1e293b;
+            color: #38bdf8;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 11px;
+            border-radius: 8px;
+            overflow-y: auto;
+        }
+
+        .property-card {
+            background: white;
+            border: 1px solid #ddd;
+            margin-top: 5px;
+            padding: 5px;
+            font-size: 10px;
+            border-radius: 4px;
+        }
+
+        button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        button:disabled { background: #cbd5e1; }
+    </style>
 </head>
 <body>
 
-<h1>Monopoly Argentina 🇦🇷</h1>
+<div id="game-container">
+    <div class="side-panel">
+        <h3 style="margin: 0 0 15px 0">Viajeros</h3>
+        <div id="players-list"></div>
+    </div>
 
-<img src="https://upload.wikimedia.org/wikipedia/commons/1/1a/Flag_of_Argentina.svg">
-<img src="https://upload.wikimedia.org/wikipedia/commons/3/32/Escudo_de_la_Rep%C3%BAblica_Argentina.svg">
+    <div id="board">
+        <div class="center-space">
+            <h2 style="color: var(--primary); margin: 0">ARGENPOLY</h2>
+            <div id="dice">⚀</div>
+            <button id="roll-btn" onclick="startTurn()">LANZAR DADOS</button>
+        </div>
+        </div>
 
-<div id="board"></div>
-
-<div class="controls">
-    <button onclick="rollDice()">Tirar Dados</button>
-    <button onclick="endGame()">Finalizar Juego</button>
+    <div class="side-panel">
+        <h3 style="margin: 0 0 10px 0">Historial</h3>
+        <div id="log"></div>
+        <div id="owned-properties" style="margin-top:15px">
+            <h4 style="margin: 5px 0">Tus Títulos</h4>
+            <div id="cards-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;"></div>
+        </div>
+    </div>
 </div>
 
-<h3>Jugador 1: $<span id="money1">1500</span> | Posición: <span id="pos1">0</span></h3>
-<h3>Jugador 2: $<span id="money2">1500</span> | Posición: <span id="pos2">0</span></h3>
-
-<div id="log"></div>
-
 <script>
-const properties = [
-    {name:"Salida 🇦🇷", price:0, owner:null},
-    {name:"Buenos Aires - La Plata", price:100, owner:null},
-    {name:"Córdoba - Córdoba Capital", price:120, owner:null},
-    {name:"Santa Fe - Rosario", price:130, owner:null},
-    {name:"Mendoza - Mendoza Capital", price:140, owner:null},
-    {name:"San Juan - San Juan", price:150, owner:null},
-    {name:"Salta - Salta Capital", price:160, owner:null},
-    {name:"Tucumán - San Miguel", price:170, owner:null},
-    {name:"Entre Ríos - Paraná", price:180, owner:null},
-    {name:"Chubut - Comodoro Rivadavia", price:190, owner:null},
-    {name:"Río Negro - Bariloche", price:200, owner:null},
-    {name:"Neuquén - Neuquén Capital", price:210, owner:null},
-    {name:"Misiones - Posadas", price:220, owner:null},
-    {name:"Jujuy - San Salvador", price:230, owner:null},
-    {name:"Cárcel", price:0, owner:null},
-    {name:"La Pampa - Santa Rosa", price:240, owner:null},
-    {name:"Formosa - Formosa", price:250, owner:null},
-    {name:"Chaco - Resistencia", price:260, owner:null},
-    {name:"Corrientes - Corrientes", price:270, owner:null},
-    {name:"Ir a la Cárcel", price:0, owner:null}
-];
+    const boardData = [
+        { n: "SALIDA", c: "#94a3b8", type: "start", x:0, y:0 },
+        { n: "Ushuaia", c: "#f87171", pr: 150, rent: 40 },
+        { n: "R. Gallegos", c: "#f87171", pr: 180, rent: 50 },
+        { n: "Viedma", c: "#fb923c", pr: 220, rent: 60 },
+        { n: "Rawson", c: "#fb923c", pr: 250, rent: 70 },
+        { n: "CÁRCEL", c: "#334155", type: "jail" }, // Esquina 1
+        { n: "Neuquén", c: "#facc15", pr: 300, rent: 85 },
+        { n: "Mendoza", c: "#facc15", pr: 350, rent: 100 },
+        { n: "San Juan", c: "#4ade80", pr: 400, rent: 120 },
+        { n: "La Rioja", c: "#4ade80", pr: 450, rent: 140 },
+        { n: "ARCA", c: "#fff", type: "special" }, // Esquina 2
+        { n: "Catamarca", c: "#2dd4bf", pr: 500, rent: 160 },
+        { n: "Tucumán", c: "#2dd4bf", pr: 550, rent: 180 },
+        { n: "Salta", c: "#60a5fa", pr: 600, rent: 200 },
+        { n: "Jujuy", c: "#60a5fa", pr: 650, rent: 220 },
+        { n: "PARKING", c: "#334155", type: "special" }, // Esquina 3
+        { n: "Córdoba", c: "#818cf8", pr: 750, rent: 280 },
+        { n: "Rosario", c: "#818cf8", pr: 800, rent: 300 },
+        { n: "La Plata", c: "#f472b6", pr: 900, rent: 400 },
+        { n: "CABA", c: "#f472b6", pr: 1200, rent: 600 }
+    ];
 
-let players = [
-    {position:0, money:1500},
-    {position:0, money:1500}
-];
+    let players = [
+        { id: 0, name: "Jugador 1", money: 2000, pos: 0, color: "#ef4444", props: [] },
+        { id: 1, name: "Servidor", money: 2000, pos: 0, color: "#3b82f6", props: [], isBot: true }
+    ];
+    let turn = 0;
+    let isMoving = false;
 
-let currentPlayer = 0;
+    function initBoard() {
+        const board = document.getElementById('board');
+        // Posicionamiento en espiral cuadrada
+        const positions = [
+            [5,5], [4,5], [3,5], [2,5], [1,5], [0,5], // Abajo
+            [0,4], [0,3], [0,2], [0,1], [0,0],         // Izquierda
+            [1,0], [2,0], [3,0], [4,0], [5,0],         // Arriba
+            [5,1], [5,2], [5,3], [5,4]                  // Derecha
+        ];
 
-function createBoard(){
-    const board = document.getElementById("board");
-    properties.forEach((prop, index)=>{
-        const cell = document.createElement("div");
-        cell.className="cell";
-        cell.id="cell"+index;
-        cell.innerHTML=prop.name+"<br>$"+prop.price;
-        board.appendChild(cell);
-    });
-}
-createBoard();
-
-function rollDice(){
-    let dice = Math.floor(Math.random()*6)+1;
-    let player = players[currentPlayer];
-
-    player.position = (player.position + dice) % properties.length;
-
-    if(player.position === 0){
-        player.money += 200;
-        log("Jugador "+(currentPlayer+1)+" pasó por Salida y cobró $200");
+        boardData.forEach((data, i) => {
+            const cell = document.createElement('div');
+            cell.className = 'cell';
+            cell.style.gridColumn = positions[i][0] + 1;
+            cell.style.gridRow = positions[i][1] + 1;
+            cell.innerHTML = `
+                ${data.pr ? `<div class="cell-color" style="background:${data.c}"></div>` : ''}
+                <div style="margin-top: 15px">${data.n}</div>
+                ${data.pr ? `<div style="color:green">$${data.pr}</div>` : ''}
+                <div id="cell-container-${i}" style="position:relative; width:100%; height:20px"></div>
+            `;
+            board.appendChild(cell);
+        });
+        createTokens();
+        updateUI();
     }
 
-    let prop = properties[player.position];
+    function createTokens() {
+        players.forEach(p => {
+            const t = document.createElement('div');
+            t.className = 'token';
+            t.id = `token-${p.id}`;
+            t.style.backgroundColor = p.color;
+            document.getElementById('board').appendChild(t);
+        });
+        moveTokenVisual(0, 0);
+        moveTokenVisual(1, 0);
+    }
 
-    if(prop.price > 0 && prop.owner === null){
-        if(player.money >= prop.price){
-            player.money -= prop.price;
-            prop.owner = currentPlayer;
-            log("Jugador "+(currentPlayer+1)+" compró "+prop.name);
+    async function startTurn() {
+        if(isMoving) return;
+        isMoving = true;
+        document.getElementById('roll-btn').disabled = true;
+
+        const diceEl = document.getElementById('dice');
+        diceEl.classList.add('rolling');
+        
+        await new Promise(r => setTimeout(r, 600));
+        const roll = Math.floor(Math.random() * 6) + 1;
+        diceEl.classList.remove('rolling');
+        diceEl.innerText = ['⚀','⚁','⚂','⚃','⚄','⚅'][roll-1];
+
+        const p = players[turn];
+        addLog(`${p.name} lanzó un ${roll}`);
+
+        // Movimiento paso a paso
+        for(let i=0; i<roll; i++) {
+            p.pos = (p.pos + 1) % boardData.length;
+            moveTokenVisual(p.id, p.pos);
+            if(p.pos === 0) {
+                p.money += 200;
+                addLog(`${p.name} pasó por Salida: +$200`);
+            }
+            await new Promise(r => setTimeout(r, 300));
+        }
+
+        handleLanding(p);
+        
+        turn = (turn + 1) % players.length;
+        isMoving = false;
+        updateUI();
+
+        if(players[turn].isBot) {
+            setTimeout(startTurn, 1000);
+        } else {
+            document.getElementById('roll-btn').disabled = false;
         }
     }
-    else if(prop.owner !== null && prop.owner !== currentPlayer){
-        let rent = 50;
-        player.money -= rent;
-        players[prop.owner].money += rent;
-        log("Jugador "+(currentPlayer+1)+" pagó $"+rent+" de alquiler");
+
+    function moveTokenVisual(pId, pos) {
+        const token = document.getElementById(`token-${pId}`);
+        const cell = document.getElementsByClassName('cell')[pos];
+        const rect = cell.getBoundingClientRect();
+        const boardRect = document.getElementById('board').getBoundingClientRect();
+        
+        const offset = pId * 10; // Para que no se tapen
+        token.style.left = (rect.left - boardRect.left + 15 + offset) + 'px';
+        token.style.top = (rect.top - boardRect.top + 25) + 'px';
     }
-    else if(prop.name==="Ir a la Cárcel"){
-        player.position = 14;
-        log("Jugador "+(currentPlayer+1)+" fue a la Cárcel");
+
+    function handleLanding(p) {
+        const tile = boardData[p.pos];
+        if(!tile.pr) return;
+
+        const owner = players.find(x => x.props.includes(tile.n));
+        if(owner && owner !== p) {
+            p.money -= tile.rent;
+            owner.money += tile.rent;
+            addLog(`¡Renta! ${p.name} pagó $${tile.rent} a ${owner.name}`);
+        } else if(!owner && p.money >= tile.pr) {
+            p.money -= tile.pr;
+            p.props.push(tile.n);
+            addLog(`${p.name} compró ${tile.n}`);
+        }
     }
 
-    updateDisplay();
-    currentPlayer = currentPlayer===0?1:0;
-}
+    function updateUI() {
+        const list = document.getElementById('players-list');
+        list.innerHTML = '';
+        players.forEach((p, i) => {
+            const div = document.createElement('div');
+            div.className = `player-info ${turn === i ? 'active' : ''}`;
+            div.style.borderLeftColor = p.color;
+            div.innerHTML = `<b>${p.name}</b><br>Efectivo: $${p.money}<br><small>${p.props.length} Propiedades</small>`;
+            list.appendChild(div);
+        });
 
-function updateDisplay(){
-    document.getElementById("money1").innerText=players[0].money;
-    document.getElementById("money2").innerText=players[1].money;
-    document.getElementById("pos1").innerText=players[0].position;
-    document.getElementById("pos2").innerText=players[1].position;
-}
-
-function log(text){
-    document.getElementById("log").innerHTML += text+"<br>";
-}
-
-function endGame(){
-    if(players[0].money > players[1].money){
-        alert("Ganó Jugador 1 🇦🇷");
-    } else if(players[1].money > players[0].money){
-        alert("Ganó Jugador 2 🇦🇷");
-    } else {
-        alert("Empate 🇦🇷");
+        // Mostrar cartas del Jugador 1
+        const cardsCont = document.getElementById('cards-container');
+        cardsCont.innerHTML = '';
+        players[0].props.forEach(propName => {
+            const data = boardData.find(b => b.n === propName);
+            const card = document.createElement('div');
+            card.className = 'property-card';
+            card.style.borderTop = `4px solid ${data.c}`;
+            card.innerHTML = `<b>${data.n}</b><br>Renta: $${data.rent}`;
+            cardsCont.appendChild(card);
+        });
     }
-}
+
+    function addLog(msg) {
+        const log = document.getElementById('log');
+        log.innerHTML = `<div>> ${msg}</div>` + log.innerHTML;
+    }
+
+    initBoard();
 </script>
-
 </body>
 </html>
